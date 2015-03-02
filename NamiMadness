@@ -75,14 +75,6 @@ function OnTick()
 	-- if NamiCFG.aLvl then
 		-- AutoLvl()
 	-- end
-	
-	if NamiCFG.pot.hPot then
-		healthPot()
-	end 
-	
-	if NamiCFG.pot.mPot then
-		manaPot()
-	end
 end
 
 --Harass with Q
