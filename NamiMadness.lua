@@ -59,9 +59,9 @@ function OnLoad()
 
 		
 	-- local A = {_Q,_W,_E,_Q,_Q,_R,_Q,_E,_Q,_W,_R,_E,_E,_E,_W,_R,_W,_W}
-	-- abilitySequenceB = {1,2,3,3,3,4,3,1,3,2,4,1,1,1,2,4,2,2}
-	-- abilitySequenceC = {1,2,3,2,2,4,2,3,2,1,4,3,3,3,1,4,1,1}
-	-- abilitySequenceD = {1,2,3,3,3,4,3,2,3,1,4,2,2,2,1,4,1,1}
+	-- local B = {_Q,_W,_E,_E,_E,_R,_E,_Q,_E,_W,_R,_Q,_Q,_Q,_W,_R,_W,_W}
+	-- local C = {_Q,_W,_E,_W,_W,_R,_W,_E,_W,_Q,_R,_E,_E,_E,_Q,_R,_Q,_Q}
+	-- local D = {_Q,_W,_E,_E,_E,_R,_E,_W,_E,_Q,_R,_W,_W,_W,_Q,_R,_Q,_Q}
 	
 end
 
@@ -93,9 +93,17 @@ function OnTick()
 	end
 	
 	-- if NamiCFG.aLvl then
-		-- AutoLvl()
+		-- AutoLvla()
 	-- end
-	
+	-- if NamiCFG.bLvl then
+		-- AutoLvlb()
+	-- end
+	-- if NamiCFG.cLvl then
+		-- AutoLvlc()
+	-- end
+	-- if NamiCFG.dLvl then
+		-- AutoLvld()
+	-- end	
 end
 --Harass with Q
 function HarassQ()
@@ -260,6 +268,31 @@ function HpCheck(unit, HealthValue)
 		return false
 	end
 end
+--auto level spells
+--function Autolvla()
+--	if not NamiCFG.aLvl.aSeq then return end
+--		if myHero.level > GetHeroLeveled() then		
+--			LevelSpell(A[GetHeroLeveled() + 1])
+--		end
+--end
+--function Autolvlb()
+--	if not NamiCFG.aLvl.bSeq then return end
+--		if myHero.level > GetHeroLeveled() then		
+--			LevelSpell(B[GetHeroLeveled() + 1])
+--		end
+--end
+--function Autolvlc()
+--	if not NamiCFG.aLvl.cSeq then return end
+--		if myHero.level > GetHeroLeveled() then		
+--			LevelSpell(C[GetHeroLeveled() + 1])
+--		end
+--end
+--function Autolvld()
+--	if not NamiCFG.aLvl.dSeq then return end
+--		if myHero.level > GetHeroLeveled() then		
+--			LevelSpell(D[GetHeroLeveled() + 1])
+--		end
+--end
 -------Auto Updater ----
 class "SxUpdate"
 function SxUpdate:__init(LocalVersion, Host, VersionPath, ScriptPath, SavePath, Callback)
@@ -316,5 +349,6 @@ function SxUpdate:DownloadUpdate()
 
     self.UpdateDone = true
 end
+
 
 
