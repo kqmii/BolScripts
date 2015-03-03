@@ -8,62 +8,56 @@
 
 
 if myHero.charName ~= "Nami" then return end
-
---Auto Update info
-_G.AUTOUPDATE = true
-local version = "1.1.1"
-local UPDATE_HOST = "raw.github.com"
-local UPDATE_PATH = "/kqmii/BolScripts/master/TestingPurpose.lua".."?rand="..math.random(1,10000)
-local UPDATE_FILE_PATH = SCRIPT_PATH..GetCurrentEnv().FILE_NAME
-local UPDATE_URL = "https://"..UPDATE_HOST..UPDATE_PATH
-function AutoupdaterMsg(msg) print("NamiMadness : "..msg..".</font>") end
 --Target Selector
 local ts
-require "VPrediction"
-require "SxOrbWalk"
+--Vpred
+require 'VPrediction'
+--Orbwalker
+require "SxOrbwalk"
 --Info des spells
 local qDelay, qRadius, qRange, qSpeed = 0.40, 200, 875, 1750
 local wRange = 725
 local eRange = 800
 local rDelay, rRadius, rRange, rSpeed = 0.5, 210, 2550, 1200
 
---Auto Update
-if _G.AUTOUPDATE then
-	local ServerData = GetWebResult(UPDATE_HOST, "/kqmii/BolScripts/master/TestingPurpose.version")
-	if ServerData then
-		ServerVersion = type(tonumber(ServerData)) == "number" and tonumber(ServerData) or nil
-		if ServerVersion then
-			if tonumber(version) < ServerVersion then
-				AutoupdaterMsg("New version available "..ServerVersion)
-				AutoupdaterMsg("Updating, please don't press F9")
-				DelayAction(function() DownloadFile(UPDATE_URL, UPDATE_FILE_PATH, function () AutoupdaterMsg("Successfully updated. ("..version.." => "..ServerVersion.."), press F9 twice to load the updated version.") end) end, 3)
-			else
-				AutoupdaterMsg("You have got the latest version ("..ServerVersion..")")
+
+-------------
+local version = "1.1.1"
+
+
+local autoupdateenabled = true
+local UPDATE_SCRIPT_NAME = "TestingPurpose.lua"
+local UPDATE_HOST = "raw.githubusercontent.com"
+local UPDATE_PATH = "/kqmii/BolScripts/master/TestingPurpose.lua"
+local UPDATE_FILE_PATH = SCRIPT_PATH..GetCurrentEnv().FILE_NAME
+local UPDATE_URL = "https://"..UPDATE_HOST..UPDATE_PATH
+
+local ServerData
+if autoupdateenabled then
+	GetAsyncWebResult(UPDATE_HOST, UPDATE_PATH, function(d) ServerData = d end)
+	function update()
+		if ServerData ~= nil then
+			local ServerVersion
+			local send, tmp, sstart = nil, string.find(ServerData, "local version = \"")
+			if sstart then
+				send, tmp = string.find(ServerData, "\"", sstart+1)
 			end
+			if send then
+				ServerVersion = tonumber(string.sub(ServerData, sstart+1, send-1))
+			end
+
+			if ServerVersion ~= nil and tonumber(ServerVersion) ~= nil and tonumber(ServerVersion) > tonumber(version) then
+				DownloadFile(UPDATE_URL.."?nocache"..myHero.charName..os.clock(), UPDATE_FILE_PATH, function () print("<font color=\"#FF0000\"><b>"..UPDATE_SCRIPT_NAME..":</b> successfully updated. Reload (double F9) Please. ("..version.." => "..ServerVersion..")</font>") end)     
+			elseif ServerVersion then
+				print("<font color=\"#FF0000\"><b>"..UPDATE_SCRIPT_NAME..":</b> You have got the latest version: <u><b>"..ServerVersion.."</b></u></font>")
+			end		
+			ServerData = nil
 		end
-	else
-		AutoupdaterMsg("Error downloading version info")
 	end
+	AddTickCallback(update)
 end
-local DOWNLOADING_LIBS, DOWNLOAD_COUNT = false, 0
-local REQUIRED_LIBS = {
-	["VPrediction"] = "https://raw.githubusercontent.com/Ralphlol/BoLGit/master/VPrediction.lua",
-	["SxOrbWalk"] = "https://raw.githubusercontent.com/Superx321/BoL/master/common/SxOrbWalk.lua",
-}
-function AfterDownload()
-	DOWNLOAD_COUNT = DOWNLOAD_COUNT - 1
-	if DOWNLOAD_COUNT == 0 then
-		DOWNLOADING_LIBS = false
-		print("<b><font color=\"#FF0000\">Required libraries downloaded successfully, please reload (double F9).</font>")
-	end
-end
-for DOWNLOAD_LIB_NAME, DOWNLOAD_LIB_URL in pairs(REQUIRED_LIBS) do
-	if FileExist(LIB_PATH .. DOWNLOAD_LIB_NAME .. ".lua") then
-		DOWNLOADING_LIBS = true
-		DOWNLOAD_COUNT = DOWNLOAD_COUNT + 1
-		DownloadFile(DOWNLOAD_LIB_URL, LIB_PATH .. DOWNLOAD_LIB_NAME..".lua", AfterDownload)
-	end
-end
+-----------------
+
 --Au demarrage
 function OnLoad()
 	Menu() -- Menu Demarrer
@@ -86,7 +80,6 @@ function OnLoad()
 	-- abilitySequenceD = {1,2,3,3,3,4,3,2,3,1,4,2,2,2,1,4,1,1}
 	
 end
-
 --Toute les 10 sec
 function OnTick()
 	ts:update()
@@ -119,7 +112,6 @@ function OnTick()
 	-- end
 	
 end
-
 --Harass with Q
 function HarassQ()
 	if NamiCFG.Harass.qHarass then
@@ -135,7 +127,6 @@ function HarassQ()
 		end
 	end
 end
-
 --Menu
 function Menu()
 	ts = TargetSelector(TARGET_LESS_CAST, 1200)
@@ -178,7 +169,6 @@ function Menu()
 			SxOrb:LoadToMenu(NamiCFG.SxOrb)
 		
 end
-
 --Combo
 function Combo()
 	if NamiCFG.Combo.comboKey then
@@ -188,7 +178,6 @@ function Combo()
 		UseW()
 	end
 end
-
 --Parametre des sorts pour Combo
 function UseQ()
 	if NamiCFG.Combo.qUse then
@@ -259,14 +248,12 @@ function OnDraw()
 		end
 	end
 end
-
 --Auto Heal Self
 function AutoHealSelf()
 	if WREADY and NamiCFG.healManager.healNami and HpCheck(myHero, NamiCFG.healManager.selfPercent) then
 		CastSpell(_W, myHero)
 	end
 end
-
 --Auto Heal Allies
 function AutoHealAllies()
 	if NamiCFG.healManager.healAllies then
@@ -280,7 +267,6 @@ function AutoHealAllies()
 		end
 	end
 end
-
 --Health Check
 function HpCheck(unit, HealthValue)
 	if unit.health < (unit.maxHealth * (HealthValue/100))
@@ -289,7 +275,6 @@ function HpCheck(unit, HealthValue)
 		return false
 	end
 end
-
 
 
 
