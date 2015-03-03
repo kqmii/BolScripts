@@ -4,9 +4,9 @@
 --			V1.1		 --
 ---------------------------
 
---[[ \\\\ TO-DO LIST ////
-- Auto Level Spell [NEED BOL UPDATE NO IDEA IF IT'S WORKING]
---]]
+
+
+
 if myHero.charName ~= "Nami" then return end
 --Target Selector
 local ts
@@ -19,9 +19,9 @@ local qDelay, qRadius, qRange, qSpeed = 0.40, 200, 875, 1750
 local wRange = 725
 local eRange = 800
 local rDelay, rRadius, rRange, rSpeed = 0.5, 210, 2550, 1200
--- Auto level spells
--- local abilitySequenceA, abilitySequenceB, abilitySequenceC, abilitySequenceD
--- local qOff, wOff, eOff, rOff = 0,0,0,0
+
+
+
 
 --Au demarrage
 function OnLoad()
@@ -39,8 +39,7 @@ function OnLoad()
 		ScriptFileOpen:write(ScriptRaw)
 		ScriptFileOpen:close()
 	    end
-		
-	-- abilitySequenceA = {1,2,3,1,1,4,1,3,1,2,4,3,3,3,2,4,2,2}
+	-- local A = {_Q,_W,_E,_Q,_Q,_R,_Q,_E,_Q,_W,_R,_E,_E,_E,_W,_R,_W,_W}
 	-- abilitySequenceB = {1,2,3,3,3,4,3,1,3,2,4,1,1,1,2,4,2,2}
 	-- abilitySequenceC = {1,2,3,2,2,4,2,3,2,1,4,3,3,3,1,4,1,1}
 	-- abilitySequenceD = {1,2,3,3,3,4,3,2,3,1,4,2,2,2,1,4,1,1}
@@ -55,6 +54,8 @@ function OnTick()
 	WREADY = (myHero:CanUseSpell(_W) == READY)
 	EREADY = (myHero:CanUseSpell(_E) == READY)
 	RREADY = (myHero:CanUseSpell(_R) == READY)
+	
+
 	
 	if NamiCFG.Harass.HarassKey then
 		HarassQ()
@@ -121,8 +122,8 @@ function Menu()
 			NamiCFG.Harass:addParam("qHarass", "Harass with Q", SCRIPT_PARAM_ONOFF, true)
 			NamiCFG.Harass:addParam("HarassKey", "Harass key", SCRIPT_PARAM_ONKEYDOWN, false, string.byte("T"))
 			
-		-- NamiCFG:addSubMenu("--["..myHero.charName.."]-- Auto Level Spell", "aLvl")
-			-- NamiCFG.aLvl:addParam("aSeq", "R > Q > E > W", SCRIPT_PARAM_ONOFF, false)
+		--NamiCFG:addSubMenu("--["..myHero.charName.."]-- Auto Level Spell", "aLvl")
+			--NamiCFG.aLvl:addParam("aSeq", "R > Q > E > W", SCRIPT_PARAM_ONOFF, false)
 			-- NamiCFG.aLvl:addParam("bSeq", "R > E > Q > W", SCRIPT_PARAM_ONOFF, false)
 			-- NamiCFG.aLvl:addParam("cSeq", "R > W > E > Q", SCRIPT_PARAM_ONOFF, false)
 			-- NamiCFG.aLvl:addParam("dSeq", "R > E > W > Q", SCRIPT_PARAM_ONOFF, false)
@@ -131,10 +132,9 @@ function Menu()
 			NamiCFG.draw:addParam("qDraw", "Q range", SCRIPT_PARAM_ONOFF, true)
 			NamiCFG.draw:addParam("wDraw", "W range", SCRIPT_PARAM_ONOFF, true)
 			NamiCFG.draw:addParam("eDraw", "E range", SCRIPT_PARAM_ONOFF, true)
-			
+				
 		NamiCFG:addSubMenu("--["..myHero.charName.."]-- Orbwalker", "SxOrb")
 			SxOrb:LoadToMenu(NamiCFG.SxOrb)
-			
 		
 end
 
@@ -250,36 +250,6 @@ function HpCheck(unit, HealthValue)
 end
 
 
---Auto Level spells
--- function AutoLvl()
-	-- local qL, wL, eL, rL = player:GetSpellData(_Q).level + qOff, player:GetSpellData(_W).level + wOff, player:GetSpellData(_E).level + eOff, player:GetSpellData(_R).level + rOff
-	-- if qL + wL + eL + rL < player.level then
-		-- local spellSlot = {SPELL_1, SPELL_2, SPELL_3, SPELL_4}
-		-- local level = {0,0,0,0}
-		-- if NamiCFG.aLvl.aSeq then
-			-- for i = 1, player.level, 1 do
-				-- level[abilitySequenceA[i]] = level[abilitySequenceA[i]] + 1
-			-- end
-		-- end
-		-- if NamiCFG.aLvl.bSeq then
-			-- for i = 1, player.level, 1 do
-				-- level[abilitySequenceB[i]] = level[abilitySequenceB[i]] + 1
-			-- end
-		-- end
-		-- if NamiCFG.aLvl.cSeq then
-			-- for i = 1, player.level, 1 do
-				-- level[abilitySequenceC[i]] = level[abilitySequenceC[i]] + 1
-			-- end
-		-- end
-		-- if NamiCFG.aLvl.dSeq then
-			-- for i = 1, player.level, 1 do
-				-- level[abilitySequenceD[i]] = level[abilitySequenceD[i]] + 1
-			-- end
-		-- end
-		-- for i, v in ipairs({qL, wL, eL, rL}) do
-			-- if v < level[i] then LevelSpell(spellSlot[i]) end
-		-- end
-	-- end			
--- end 
+
 
 
