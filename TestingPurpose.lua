@@ -24,21 +24,21 @@ local rDelay, rRadius, rRange, rSpeed = 0.5, 210, 2550, 1200
 -------------
 class "ScriptUpdate"
 function ScriptUpdate:__init(LocalVersion, Host, VersionPath, ScriptPath, SavePath, CallbackUpdate, CallbackNoUpdate, CallbackNewVersion)
-    self.LocalVersion = LocalVersion
-    self.Host = Host
-    self.VersionPath = '/BoL/TCPUpdater/GetScript2.php?script='..self:Base64Encode(self.Host..VersionPath)..'&rand='..math.random(99999999)
-    self.ScriptPath = '/BoL/TCPUpdater/GetScript2.php?script='..self:Base64Encode(self.Host..ScriptPath)..'&rand='..math.random(99999999)
-    self.SavePath = SavePath
-    self.CallbackUpdate = CallbackUpdate
-    self.CallbackNoUpdate = CallbackNoUpdate
-    self.CallbackNewVersion = CallbackNewVersion
-    self.LuaSocket = require("socket")
-    self.Socket = self.LuaSocket.connect('sx-bol.eu', 80)
-    self.Socket:send("GET "..self.VersionPath.." HTTP/1.0\r\nHost: sx-bol.eu\r\n\r\n")
-    self.Socket:settimeout(0, 'b')
-    self.Socket:settimeout(99999999, 't')
-    self.LastPrint = ""
-    self.File = ""
+    LocalVersion = LocalVersion
+    Host = Host
+    VersionPath = '/BoL/TCPUpdater/GetScript2.php?script='..self:Base64Encode(Host..VersionPath)..'&rand='..math.random(99999999)
+    ScriptPath = '/BoL/TCPUpdater/GetScript2.php?script='..self:Base64Encode(Host..ScriptPath)..'&rand='..math.random(99999999)
+    SavePath = SavePath
+    CallbackUpdate = CallbackUpdate
+    CallbackNoUpdate = CallbackNoUpdate
+    CallbackNewVersion = CallbackNewVersion
+    LuaSocket = require("socket")
+    Socket = LuaSocket.connect('sx-bol.eu', 80)
+    Socket:send("GET "..VersionPath.." HTTP/1.0\r\nHost: sx-bol.eu\r\n\r\n")
+    Socket:settimeout(0, 'b')
+    Socket:settimeout(99999999, 't')
+    LastPrint = ""
+    File = ""
     AddTickCallback(function() self:GetOnlineVersion() end)
 end
 
@@ -57,37 +57,37 @@ function ScriptUpdate:Base64Encode(data)
 end
 
 function ScriptUpdate:GetOnlineVersion()
-    if self.Status == 'closed' then return end
-    self.Receive, self.Status, self.Snipped = self.Socket:receive(1024)
+    if Status == 'closed' then return end
+    Receive, Status, Snipped = Socket:receive(1024)
 
-    if self.Receive then
-        if self.LastPrint ~= self.Receive then
-            self.LastPrint = self.Receive
-            self.File = self.File .. self.Receive
+    if Receive then
+        if LastPrint ~= Receive then
+            LastPrint = Receive
+            File = File .. Receive
         end
     end
 
-    if self.Snipped ~= "" and self.Snipped then
-        self.File = self.File .. self.Snipped
+    if Snipped ~= "" and Snipped then
+        File = File .. Snipped
     end
-    if self.Status == 'closed' then
-        local HeaderEnd, ContentStart = self.File:find('\r\n\r\n')
+    if Status == 'closed' then
+        local HeaderEnd, ContentStart = File:find('\r\n\r\n')
         if HeaderEnd and ContentStart then
-            self.OnlineVersion = tonumber(self.File:sub(ContentStart + 1))
-            if self.OnlineVersion > self.LocalVersion then
-                if self.CallbackNewVersion and type(self.CallbackNewVersion) == 'function' then
-                    self.CallbackNewVersion(self.OnlineVersion,self.LocalVersion)
+            OnlineVersion = tonumber(File:sub(ContentStart + 1))
+            if OnlineVersion > LocalVersion then
+                if CallbackNewVersion and type(CallbackNewVersion) == 'function' then
+                    CallbackNewVersion(OnlineVersion,LocalVersion)
                 end
-                self.DownloadSocket = self.LuaSocket.connect('sx-bol.eu', 80)
-                self.DownloadSocket:send("GET "..self.ScriptPath.." HTTP/1.0\r\nHost: sx-bol.eu\r\n\r\n")
-                self.DownloadSocket:settimeout(0, 'b')
-                self.DownloadSocket:settimeout(99999999, 't')
-                self.LastPrint = ""
-                self.File = ""
+                DownloadSocket = LuaSocket.connect('sx-bol.eu', 80)
+                DownloadSocket:send("GET "..ScriptPath.." HTTP/1.0\r\nHost: sx-bol.eu\r\n\r\n")
+                DownloadSocket:settimeout(0, 'b')
+                DownloadSocket:settimeout(99999999, 't')
+                LastPrint = ""
+                File = ""
                 AddTickCallback(function() self:DownloadUpdate() end)
             else
-                if self.CallbackNoUpdate and type(self.CallbackNoUpdate) == 'function' then
-                    self.CallbackNoUpdate(self.LocalVersion)
+                if CallbackNoUpdate and type(CallbackNoUpdate) == 'function' then
+                    CallbackNoUpdate(LocalVersion)
                 end
             end
         else
@@ -97,28 +97,28 @@ function ScriptUpdate:GetOnlineVersion()
 end
 
 function ScriptUpdate:DownloadUpdate()
-    if self.DownloadStatus == 'closed' then return end
-    self.DownloadReceive, self.DownloadStatus, self.DownloadSnipped = self.DownloadSocket:receive(1024)
+    if DownloadStatus == 'closed' then return end
+    DownloadReceive, DownloadStatus, DownloadSnipped = DownloadSocket:receive(1024)
 
-    if self.DownloadReceive then
-        if self.LastPrint ~= self.DownloadReceive then
-            self.LastPrint = self.DownloadReceive
-            self.File = self.File .. self.DownloadReceive
+    if DownloadReceive then
+        if LastPrint ~= DownloadReceive then
+            LastPrint = DownloadReceive
+            File = File .. DownloadReceive
         end
     end
 
-    if self.DownloadSnipped ~= "" and self.DownloadSnipped then
-        self.File = self.File .. self.DownloadSnipped
+    if DownloadSnipped ~= "" and DownloadSnipped then
+        File = File .. DownloadSnipped
     end
 
-    if self.DownloadStatus == 'closed' then
-        local HeaderEnd, ContentStart = self.File:find('\r\n\r\n')
+    if DownloadStatus == 'closed' then
+        local HeaderEnd, ContentStart = File:find('\r\n\r\n')
         if HeaderEnd and ContentStart then
-            local ScriptFileOpen = io.open(self.SavePath, "w+")
-            ScriptFileOpen:write(self.File:sub(ContentStart + 1))
+            local ScriptFileOpen = io.open(SavePath, "w+")
+            ScriptFileOpen:write(File:sub(ContentStart + 1))
             ScriptFileOpen:close()
-            if self.CallbackUpdate and type(self.CallbackUpdate) == 'function' then
-                self.CallbackUpdate(self.OnlineVersion,self.LocalVersion)
+            if CallbackUpdate and type(CallbackUpdate) == 'function' then
+                CallbackUpdate(OnlineVersion,LocalVersion)
             end
         end
     end
@@ -162,10 +162,10 @@ function OnLoad()
 end
 
 function update()
-		self.version = 1.2
-		print('<font color=\'#F0Ff8d\'><b>NamiMadness:</b></font> <font color=\'#FF0F0F\'>Version '..self.version..' loaded</font>')
+		version = 1.2
+		print('<font color=\'#F0Ff8d\'><b>NamiMadness:</b></font> <font color=\'#FF0F0F\'>Version '..version..' loaded</font>')
 		local ToUpdate = {}
-		ToUpdate.Version = self.version
+		ToUpdate.Version = version
 		ToUpdate.Host = "raw.githubusercontent.com"
 		ToUpdate.VersionPath = "/kqmii/BolScripts/master/TestingPurpose.lua"
 		ToUpdate.ScriptPath = "/kqmii/BolScripts/master/TestingPurpose.version"
