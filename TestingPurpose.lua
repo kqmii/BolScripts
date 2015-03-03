@@ -55,7 +55,7 @@ function OnLoad()
         "/kqmii/BolScripts/master/TestingPurpose.version",
         "/kqmii/BolScripts/master/TestingPurpose.lua",
         SCRIPT_PATH.."TestingPurpose.lua",
-        function(NewVersion) if NewVersion > 1 then print("<font color=\"#F0Ff8d\"><b>NamiMadness: </b></font> <font color=\"#FF0F0F\">Updated to "..NewVersion..". Please Reload with 2x F9</b></font>") else print("<font color=\"#F0Ff8d\"><b>ShadowVayne: </b></font> <font color=\"#FF0F0F\">You have the Latest Version</b></font>") end end)
+        function(NewVersion) if NewVersion > 1 then print("<font color=\"#F0Ff8d\"><b>NamiMadness: </b></font> <font color=\"#FF0F0F\">Updated to "..NewVersion..". Please Reload with 2x F9</b></font>") else print("<font color=\"#F0Ff8d\"><b>NamiMadness: </b></font> <font color=\"#FF0F0F\">You have the Latest Version</b></font>") end end)
 		
 
 		
