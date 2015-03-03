@@ -165,7 +165,9 @@ function OnLoad()
 		ScriptFileOpen = io.open(LIB_PATH.."VPrediction.lua", "w+")
 		ScriptFileOpen:write(ScriptRaw)
 		ScriptFileOpen:close()
-	    end
+    end
+    
+    TestingPurpose()
 	-- local A = {_Q,_W,_E,_Q,_Q,_R,_Q,_E,_Q,_W,_R,_E,_E,_E,_W,_R,_W,_W}
 	-- abilitySequenceB = {1,2,3,3,3,4,3,1,3,2,4,1,1,1,2,4,2,2}
 	-- abilitySequenceC = {1,2,3,2,2,4,2,3,2,1,4,3,3,3,1,4,1,1}
