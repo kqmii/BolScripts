@@ -19,7 +19,8 @@ local UPDATE_URL = "https://"..UPDATE_HOST..UPDATE_PATH
 function AutoupdaterMsg(msg) print("NamiMadness : "..msg..".</font>") end
 --Target Selector
 local ts
-
+require "VPrediction"
+require "SxOrbWalk"
 --Info des spells
 local qDelay, qRadius, qRange, qSpeed = 0.40, 200, 875, 1750
 local wRange = 725
