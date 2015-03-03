@@ -26,7 +26,7 @@ local rDelay, rRadius, rRange, rSpeed = 0.5, 210, 2550, 1200
 --Au demarrage
 function OnLoad()
 	Menu() -- Menu Demarrer
-	PrintChat ("NamiMadness by Kqmii V1.1 Loaded")
+	PrintChat ("NamiMadness by Kqmii V1.2 Loaded")
 	PrintChat ("Report any problem by pm to kqmii on bol")
 	
 		if not FileExist(LIB_PATH.."SxOrbWalk.lua") then
@@ -49,15 +49,16 @@ function OnLoad()
 		ScriptFileOpen:write(ScriptRaw)
 		ScriptFileOpen:close()
 	    end
-		SxUpdate(1.1,
+		SxUpdate(1.2,
         "raw.githubusercontent.com",
         "/kqmii/BolScripts/master/NamiMadness.version",
         "/kqmii/BolScripts/master/NamiMadness.lua",
         SCRIPT_PATH.."NamiMadness.lua",
-        function(NewVersion) if NewVersion > 1.1 then print("<font color=\"#F0Ff8d\"><b>NamiMadness: </b></font> <font color=\"#FF0F0F\">Updated to "..NewVersion..". Please Reload with 2x F9</b></font>") else print("<font color=\"#F0Ff8d\"><b>NamiMadness: </b></font> <font color=\"#FF0F0F\">You have the Latest Version</b></font>") end end)
+        function(NewVersion) if NewVersion > 1.2 then print("<font color=\"#F0Ff8d\"><b>NamiMadness: </b></font> <font color=\"#FF0F0F\">Updated to "..NewVersion..". Please Reload with 2x F9</b></font>") else print("<font color=\"#F0Ff8d\"><b>NamiMadness: </b></font> <font color=\"#FF0F0F\">You have the Latest Version</b></font>") end end)
 		
-
-		
+		_G.oldDrawCircle = rawget(_G, 'DrawCircle')
+		_G.DrawCircle = DrawCircle2
+	
 	-- local A = {_Q,_W,_E,_Q,_Q,_R,_Q,_E,_Q,_W,_R,_E,_E,_E,_W,_R,_W,_W}
 	-- local B = {_Q,_W,_E,_E,_E,_R,_E,_Q,_E,_W,_R,_Q,_Q,_Q,_W,_R,_W,_W}
 	-- local C = {_Q,_W,_E,_W,_W,_R,_W,_E,_W,_Q,_R,_E,_E,_E,_Q,_R,_Q,_Q}
@@ -91,6 +92,8 @@ function OnTick()
 	if NamiCFG.healManager.healAllies then
 		AutoHealAllies()
 	end
+					
+	if NamiCFG.draw.Lfc then _G.DrawCircle = DrawCircle2 else _G.DrawCircle = _G.oldDrawCircle end
 	
 	-- if NamiCFG.aLvl then
 		-- AutoLvla()
@@ -157,6 +160,9 @@ function Menu()
 			NamiCFG.draw:addParam("qDraw", "Q range", SCRIPT_PARAM_ONOFF, true)
 			NamiCFG.draw:addParam("wDraw", "W range", SCRIPT_PARAM_ONOFF, true)
 			NamiCFG.draw:addParam("eDraw", "E range", SCRIPT_PARAM_ONOFF, true)
+			NamiCFG.draw:addParam("Lfc", "Activate Lag Free Circles", SCRIPT_PARAM_ONOFF, false)
+			NamiCFG.draw:addParam("CL", "Lag Free Circles Quality", 4, 75, 75, 2000, 0)
+			NamiCFG.draw:addParam("Width", "Lag Free Circles Width", 4, 2, 1, 10, 0)
 				
 		NamiCFG:addSubMenu("--["..myHero.charName.."]-- Orbwalker", "SxOrb")
 			SxOrb:LoadToMenu(NamiCFG.SxOrb)
@@ -222,15 +228,15 @@ end
 --Drawings
 function OnDraw()
 	if NamiCFG.draw.qDraw then
-		DrawCircle(myHero.x, myHero.y, myHero.z, qRange, 0x6600FF)
+		DrawCircle(myHero.x, myHero.y, myHero.z, qRange, ARGB(255, 0, 0, 255))
 	end
 	
 	if NamiCFG.draw.wDraw then
-		DrawCircle(myHero.x, myHero.y, myHero.z, wRange, 0x6666FF)
+		DrawCircle(myHero.x, myHero.y, myHero.z, wRange, ARGB(255, 0, 51, 255))
 	end
 	
 	if NamiCFG.draw.eDraw then
-		DrawCircle(myHero.x, myHero.y, myHero.z, eRange, 0x66CCFF)
+		DrawCircle(myHero.x, myHero.y, myHero.z, eRange, ARGB(255, 0, 102, 255))
 	end
 	
 	DrawCircle(myHero.x, myHero.y, myHero.z, 675, ARGB(255, 0, 255, 0))
@@ -268,6 +274,37 @@ function HpCheck(unit, HealthValue)
 		return false
 	end
 end
+--------- Barasia, vadash, viseversa LFC
+function DrawCircleNextLvl(x, y, z, radius, width, color, chordlength)
+  radius = radius or 300
+  quality = math.max(8,round(180/math.deg((math.asin((chordlength/(2*radius)))))))
+  quality = 2 * math.pi / quality
+  radius = radius*.92
+  
+  local points = {}
+  for theta = 0, 2 * math.pi + quality, quality do
+    local c = WorldToScreen(D3DXVECTOR3(x + radius * math.cos(theta), y, z - radius * math.sin(theta)))
+    points[#points + 1] = D3DXVECTOR2(c.x, c.y)
+  end
+  
+  DrawLines2(points, width or 1, color or 4294967295)
+end
+
+function round(num) 
+  if num >= 0 then return math.floor(num+.5) else return math.ceil(num-.5) end
+end
+
+function DrawCircle2(x, y, z, radius, color)
+  local vPos1 = Vector(x, y, z)
+  local vPos2 = Vector(cameraPos.x, cameraPos.y, cameraPos.z)
+  local tPos = vPos1 - (vPos1 - vPos2):normalized() * radius
+  local sPos = WorldToScreen(D3DXVECTOR3(tPos.x, tPos.y, tPos.z))
+  
+  if OnScreen({ x = sPos.x, y = sPos.y }, { x = sPos.x, y = sPos.y }) then
+    DrawCircleNextLvl(x, y, z, radius, NamiCFG.draw.Width, color, NamiCFG.draw.CL) 
+  end
+end
+
 --auto level spells
 --function Autolvla()
 --	if not NamiCFG.aLvl.aSeq then return end
@@ -349,6 +386,5 @@ function SxUpdate:DownloadUpdate()
 
     self.UpdateDone = true
 end
-
 
 
