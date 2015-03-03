@@ -15,7 +15,7 @@ require 'VPrediction'
 --Orbwalker
 require "SxOrbwalk"
 --Info des spells
-local qDelay, qRadius, qRange, qSpeed = 0.875, 160, 875, 1750
+local qDelay, qRadius, qRange, qSpeed = 0.60, 160, 875, 1750
 local wRange = 725
 local eRange = 800
 local rDelay, rRadius, rRange, rSpeed = 0.5, 210, 2550, 1200
