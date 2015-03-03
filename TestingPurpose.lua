@@ -38,7 +38,7 @@ if autoupdateenabled then
 	function update()
 		if ServerData ~= nil then
 			local ServerVersion
-			local send, tmp, sstart = nil, string.find(ServerData, "/kqmii/BolScripts/master/TestingPurpose.version"")
+			local send, tmp, sstart = nil, string.find(ServerData, "/kqmii/BolScripts/master/TestingPurpose.version")
 			if sstart then
 				send, tmp = string.find(ServerData, "\"", sstart+1)
 			end
