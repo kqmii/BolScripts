@@ -61,7 +61,7 @@ end
 --Au demarrage
 function OnLoad()
 	Menu() -- Menu Demarrer
-	PrintChat ("NamiMadness by Kqmii V0.1 Loaded")
+	PrintChat ("NamiMadness by Kqmii V1.1.1 Loaded")
 	PrintChat ("Report any problem by pm to kqmii on bol")
 	
 		if not FileExist(LIB_PATH.."SxOrbWalk.lua") then
