@@ -13,7 +13,7 @@ if myHero.charName ~= "Nami" then return end
 _G.AUTOUPDATE = true
 local version = "1.1"
 local UPDATE_HOST = "raw.github.com"
-local UPDATE_PATH = "/kqmii/BolScripts/master/NamiMadness".."?rand="..math.random(1,10000)
+local UPDATE_PATH = "/kqmii/BolScripts/master/TestingPurpose.lua".."?rand="..math.random(1,10000)
 local UPDATE_FILE_PATH = SCRIPT_PATH..GetCurrentEnv().FILE_NAME
 local UPDATE_URL = "https://"..UPDATE_HOST..UPDATE_PATH
 function AutoupdaterMsg(msg) print("NamiMadness : "..msg..".</font>") end
@@ -28,7 +28,7 @@ local rDelay, rRadius, rRange, rSpeed = 0.5, 210, 2550, 1200
 
 --Auto Update
 if _G.AUTOUPDATE then
-	local ServerData = GetWebResult(UPDATE_HOST, "/kqmii/BolScripts/master/NamiMadness.version")
+	local ServerData = GetWebResult(UPDATE_HOST, "/kqmii/BolScripts/master/TestingPurpose.version")
 	if ServerData then
 		ServerVersion = type(tonumber(ServerData)) == "number" and tonumber(ServerData) or nil
 		if ServerVersion then
