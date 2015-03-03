@@ -153,7 +153,7 @@ function UseQ()
 			if ts.target ~= nil then
 				if QREADY then
 					local CastPosition, HitChance, Position = VP:GetCircularCastPosition(ts.target, qDelay, qRadius, qRange, qSpeed)
-						if HitChance >=3 and GetDistance(CastPosition) < qRange then
+						if HitChance >=2 and GetDistance(CastPosition) < qRange then
 							CastSpell(_Q, CastPosition.x, CastPosition.z)
 						end
 				end
@@ -188,7 +188,7 @@ function UseR()
 	for i, target in pairs(GetEnemyHeroes()) do
 		if target ~= nil and ValidTarget(ts.target) then
 			local AECastPosition, MTHitChance, nTarget = VP:GetLineAOECastPosition(ts.target, rDelay, rRadius, NamiCFG.Combo.mnRange, rSpeed, myHero)
-			if MTHitChance >= 3 and GetDistance(AECastPosition) < NamiCFG.Combo.ultConf.mnRange and nTarget >= NamiCFG.Combo.ultConf.mnChar and RREADY then
+			if MTHitChance >= 2 and GetDistance(AECastPosition) < NamiCFG.Combo.ultConf.mnRange and nTarget >= NamiCFG.Combo.ultConf.mnChar and RREADY then
 			CastSpell(_R, AECastPosition.x, AECastPosition.z)
 			end
 		end
