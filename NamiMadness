@@ -1,7 +1,7 @@
 ---------------------------
 --  NamiMadness by Kqmii --
 --	                     --
---			V1.0		 --
+--			V1.1		 --
 ---------------------------
 
 --[[ \\\\ TO-DO LIST ////
@@ -75,6 +75,7 @@ function OnTick()
 	-- if NamiCFG.aLvl then
 		-- AutoLvl()
 	-- end
+	
 end
 
 --Harass with Q
@@ -84,7 +85,7 @@ function HarassQ()
 			if ts.target ~= nil then
 				if QREADY then
 					local CastPosition, HitChance, Position = VP:GetCircularCastPosition(ts.target, qDelay, qRadius, qRange, qSpeed)
-						if HitChance >=2 and GetDistance(CastPosition) < qRange then
+						if HitChance >=3 and GetDistance(CastPosition) < qRange then
 							CastSpell(_Q, CastPosition.x, CastPosition.z)
 						end
 				end
@@ -133,7 +134,8 @@ function Menu()
 			
 		NamiCFG:addSubMenu("--["..myHero.charName.."]-- Orbwalker", "SxOrb")
 			SxOrb:LoadToMenu(NamiCFG.SxOrb)
-					
+			
+		
 end
 
 --Combo
@@ -187,9 +189,9 @@ end
 function UseR()
 	for i, target in pairs(GetEnemyHeroes()) do
 		if target ~= nil and ValidTarget(ts.target) then
-			local AECastPosition, MTHitChance, nTarget = VP:GetLineAOECastPosition(ts.target, rDelay, rRadius, NamiCFG.Combo.mnRange, rSpeed, myHero)
-			if MTHitChance >= 2 and GetDistance(AECastPosition) < NamiCFG.Combo.ultConf.mnRange and nTarget >= NamiCFG.Combo.ultConf.mnChar and RREADY then
-			CastSpell(_R, AECastPosition.x, AECastPosition.z)
+			local AOECastPosition, MainTargetHitChance, nTargets = VP:GetLineAOECastPosition(ts.target, rDelay, rRadius, NamiCFG.Combo.mnRange, rSpeed, myHero)
+			if MainTargetHitChance >= 2 and GetDistance(AOECastPosition) < NamiCFG.Combo.ultConf.mnRange and nTargets >= NamiCFG.Combo.ultConf.mnChar and RREADY then
+			CastSpell(_R, AOECastPosition.x, AOECastPosition.z)
 			end
 		end
 	end
@@ -246,6 +248,7 @@ function HpCheck(unit, HealthValue)
 		return false
 	end
 end
+
 
 --Auto Level spells
 -- function AutoLvl()
