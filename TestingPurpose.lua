@@ -124,22 +124,6 @@ function ScriptUpdate:DownloadUpdate()
     end
 end------------
 
-class 'TestingPurpose'
-function TestingPurpose:_init()
-    self.version = 1.1
-    print('<font color=\'#F0Ff8d\'><b>NamiMadness:</b></font> <font color=\'#FF0F0F\'>Version '..self.version..' loaded</font>')
-    local ToUpdate = {}
-    ToUpdate.Version = self.version
-    ToUpdate.Host = "raw.githubusercontent.com"
-    ToUpdate.VersionPath = "/kqmii/BolScripts/master/TestingPurpose.lua"
-    ToUpdate.ScriptPath = "/kqmii/BolScripts/master/TestingPurpose.version"
-    ToUpdate.SavePath = SCRIPT_PATH.."TestingPurpose.lua"
-    ToUpdate.CallbackUpdate = function(NewVersion,OldVersion) print("<font color=\"#F0Ff8d\"><b>NamiMadness: </b></font> <font color=\"#FF0F0F\">Updated to "..NewVersion..". Please Reload with 2x F9</b></font>") end
-    ToUpdate.CallbackNoUpdate = function(OldVersion) print("<font color=\"#F0Ff8d\"><b>NamiMadness: </b></font> <font color=\"#FF0F0F\">No Updates Found</b></font>") end
-    ToUpdate.CallbackNewVersion = function(NewVersion) print("<font color=\"#F0Ff8d\"><b>NamiMadness: </b></font> <font color=\"#FF0F0F\">New Version found ("..NewVersion.."). Please wait until its downloaded</b></font>") end
-    ScriptUpdate(ToUpdate.Version, ToUpdate.Host, ToUpdate.VersionPath, ToUpdate.ScriptPath, ToUpdate.SavePath, ToUpdate.CallbackUpdate,ToUpdate.CallbackNoUpdate, ToUpdate.CallbackNewVersion)
-
-end
 --Au demarrage
 function OnLoad()
 	Menu() -- Menu Demarrer
