@@ -184,7 +184,7 @@ function UseQ()
 			if ts.target ~= nil then
 				if QREADY then
 					local CastPosition, HitChance, Position = VP:GetCircularCastPosition(ts.target, qDelay, qRadius, qRange, qSpeed)
-						if HitChance >=2 and GetDistance(CastPosition) < qRange then
+						if HitChance >=3 and GetDistance(CastPosition) < qRange then
 							CastSpell(_Q, CastPosition.x, CastPosition.z)
 						end
 				end
