@@ -143,6 +143,7 @@ end
 --Au demarrage
 function OnLoad()
 	Menu() -- Menu Demarrer
+	update()
 	PrintChat ("NamiMadness by Kqmii V1.2 Loaded")
 	PrintChat ("Report any problem by pm to kqmii on bol")
 	
@@ -167,6 +168,16 @@ function OnLoad()
 		ScriptFileOpen:close()
 	    end
 		
+
+		
+	-- local A = {_Q,_W,_E,_Q,_Q,_R,_Q,_E,_Q,_W,_R,_E,_E,_E,_W,_R,_W,_W}
+	-- abilitySequenceB = {1,2,3,3,3,4,3,1,3,2,4,1,1,1,2,4,2,2}
+	-- abilitySequenceC = {1,2,3,2,2,4,2,3,2,1,4,3,3,3,1,4,1,1}
+	-- abilitySequenceD = {1,2,3,3,3,4,3,2,3,1,4,2,2,2,1,4,1,1}
+	
+end
+
+function update()
 		self.version = 1.2
 		print('<font color=\'#F0Ff8d\'><b>NamiMadness:</b></font> <font color=\'#FF0F0F\'>Version '..self.version..' loaded</font>')
 		local ToUpdate = {}
@@ -179,13 +190,6 @@ function OnLoad()
 		ToUpdate.CallbackNoUpdate = function(OldVersion) print("<font color=\"#F0Ff8d\"><b>NamiMadness: </b></font> <font color=\"#FF0F0F\">No Updates Found</b></font>") end
 		ToUpdate.CallbackNewVersion = function(NewVersion) print("<font color=\"#F0Ff8d\"><b>NamiMadness: </b></font> <font color=\"#FF0F0F\">New Version found ("..NewVersion.."). Please wait until its downloaded</b></font>") end
 		ScriptUpdate(ToUpdate.Version, ToUpdate.Host, ToUpdate.VersionPath, ToUpdate.ScriptPath, ToUpdate.SavePath, ToUpdate.CallbackUpdate,ToUpdate.CallbackNoUpdate, ToUpdate.CallbackNewVersion)
-
-		
-	-- local A = {_Q,_W,_E,_Q,_Q,_R,_Q,_E,_Q,_W,_R,_E,_E,_E,_W,_R,_W,_W}
-	-- abilitySequenceB = {1,2,3,3,3,4,3,1,3,2,4,1,1,1,2,4,2,2}
-	-- abilitySequenceC = {1,2,3,2,2,4,2,3,2,1,4,3,3,3,1,4,1,1}
-	-- abilitySequenceD = {1,2,3,3,3,4,3,2,3,1,4,2,2,2,1,4,1,1}
-	
 end
 --Toute les 10 sec
 function OnTick()
