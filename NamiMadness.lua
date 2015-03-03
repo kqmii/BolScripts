@@ -15,18 +15,18 @@ require 'VPrediction'
 --Orbwalker
 require "SxOrbwalk"
 --Info des spells
-local qDelay, qRadius, qRange, qSpeed = 0.40, 200, 875, 1750
+local qDelay, qRadius, qRange, qSpeed = 0.875, 160, 875, 1750
 local wRange = 725
 local eRange = 800
 local rDelay, rRadius, rRange, rSpeed = 0.5, 210, 2550, 1200
 
-
+-------------
 
 
 --Au demarrage
 function OnLoad()
 	Menu() -- Menu Demarrer
-	PrintChat ("NamiMadness by Kqmii V0.1 Loaded")
+	PrintChat ("NamiMadness by Kqmii V1.1 Loaded")
 	PrintChat ("Report any problem by pm to kqmii on bol")
 	
 		if not FileExist(LIB_PATH.."SxOrbWalk.lua") then
@@ -39,6 +39,25 @@ function OnLoad()
 		ScriptFileOpen:write(ScriptRaw)
 		ScriptFileOpen:close()
 	    end
+		if not FileExist(LIB_PATH.."VPrediction.lua") then
+		LuaSocket = require("socket")
+		ScriptSocket = LuaSocket.connect("sx-bol.eu", 80)
+		ScriptSocket:send("GET /BoL/TCPUpdater/GetScript.php?script=raw.githubusercontent.com/Ralphlol/BoLGit/master/VPrediction.lua&rand="..tostring(math.random(1000)).." HTTP/1.0\r\n\r\n")
+		ScriptReceive, ScriptStatus = ScriptSocket:receive('*a')
+		ScriptRaw = string.sub(ScriptReceive, string.find(ScriptReceive, "<bols".."cript>")+11, string.find(ScriptReceive, "</bols".."cript>")-1)
+		ScriptFileOpen = io.open(LIB_PATH.."VPrediction.lua", "w+")
+		ScriptFileOpen:write(ScriptRaw)
+		ScriptFileOpen:close()
+	    end
+		SxUpdate(1.1,
+        "raw.githubusercontent.com",
+        "/kqmii/BolScripts/master/NamiMadness.version",
+        "/kqmii/BolScripts/master/NamiMadness.lua",
+        SCRIPT_PATH.."NamiMadness.lua",
+        function(NewVersion) if NewVersion > 1.1 then print("<font color=\"#F0Ff8d\"><b>NamiMadness: </b></font> <font color=\"#FF0F0F\">Updated to "..NewVersion..". Please Reload with 2x F9</b></font>") else print("<font color=\"#F0Ff8d\"><b>NamiMadness: </b></font> <font color=\"#FF0F0F\">You have the Latest Version</b></font>") end end)
+		
+
+		
 	-- local A = {_Q,_W,_E,_Q,_Q,_R,_Q,_E,_Q,_W,_R,_E,_E,_E,_W,_R,_W,_W}
 	-- abilitySequenceB = {1,2,3,3,3,4,3,1,3,2,4,1,1,1,2,4,2,2}
 	-- abilitySequenceC = {1,2,3,2,2,4,2,3,2,1,4,3,3,3,1,4,1,1}
@@ -78,7 +97,6 @@ function OnTick()
 	-- end
 	
 end
-
 --Harass with Q
 function HarassQ()
 	if NamiCFG.Harass.qHarass then
@@ -94,7 +112,6 @@ function HarassQ()
 		end
 	end
 end
-
 --Menu
 function Menu()
 	ts = TargetSelector(TARGET_LESS_CAST, 1200)
@@ -137,7 +154,6 @@ function Menu()
 			SxOrb:LoadToMenu(NamiCFG.SxOrb)
 		
 end
-
 --Combo
 function Combo()
 	if NamiCFG.Combo.comboKey then
@@ -147,7 +163,6 @@ function Combo()
 		UseW()
 	end
 end
-
 --Parametre des sorts pour Combo
 function UseQ()
 	if NamiCFG.Combo.qUse then
@@ -218,14 +233,12 @@ function OnDraw()
 		end
 	end
 end
-
 --Auto Heal Self
 function AutoHealSelf()
 	if WREADY and NamiCFG.healManager.healNami and HpCheck(myHero, NamiCFG.healManager.selfPercent) then
 		CastSpell(_W, myHero)
 	end
 end
-
 --Auto Heal Allies
 function AutoHealAllies()
 	if NamiCFG.healManager.healAllies then
@@ -239,7 +252,6 @@ function AutoHealAllies()
 		end
 	end
 end
-
 --Health Check
 function HpCheck(unit, HealthValue)
 	if unit.health < (unit.maxHealth * (HealthValue/100))
@@ -248,8 +260,62 @@ function HpCheck(unit, HealthValue)
 		return false
 	end
 end
+-------Auto Updater ----
+class "SxUpdate"
+function SxUpdate:__init(LocalVersion, Host, VersionPath, ScriptPath, SavePath, Callback)
+    self.Callback = Callback
+    self.LocalVersion = LocalVersion
+    self.Host = Host
+    self.VersionPath = VersionPath
+    self.ScriptPath = ScriptPath
+    self.SavePath = SavePath
+    self.LuaSocket = require("socket")
+    AddTickCallback(function() self:GetOnlineVersion() end)
+    DelayAction(function() self.UpdateDone = true end, 2)
+end
 
+function SxUpdate:GetOnlineVersion()
+    if self.UpdateDone then return end
+    if not self.OnlineVersion and not self.VersionSocket then
+        self.VersionSocket = self.LuaSocket.connect("sx-bol.eu", 80)
+        self.VersionSocket:send("GET /BoL/TCPUpdater/GetScript.php?script="..self.Host..self.VersionPath.."&rand="..tostring(math.random(1000)).." HTTP/1.0\r\n\r\n")
+    end
 
+    if not self.OnlineVersion and self.VersionSocket then
+        self.VersionSocket:settimeout(0, 'b')
+        self.VersionSocket:settimeout(99999999, 't')
+        self.VersionReceive, self.VersionStatus = self.VersionSocket:receive('*a')
+    end
+
+    if not self.OnlineVersion and self.VersionSocket and self.VersionStatus ~= 'timeout' then
+        if self.VersionReceive then
+            self.OnlineVersion = tonumber(string.sub(self.VersionReceive, string.find(self.VersionReceive, "<bols".."cript>")+11, string.find(self.VersionReceive, "</bols".."cript>")-1))
+            if not self.OnlineVersion then print(self.VersionReceive) end
+        else
+            print('AutoUpdate Failed')
+            self.OnlineVersion = 0
+        end
+        self:DownloadUpdate()
+    end
+end
+
+function SxUpdate:DownloadUpdate()
+    if self.OnlineVersion > self.LocalVersion then
+        self.ScriptSocket = self.LuaSocket.connect("sx-bol.eu", 80)
+        self.ScriptSocket:send("GET /BoL/TCPUpdater/GetScript.php?script="..self.Host..self.ScriptPath.."&rand="..tostring(math.random(1000)).." HTTP/1.0\r\n\r\n")
+        self.ScriptReceive, self.ScriptStatus = self.ScriptSocket:receive('*a')
+        self.ScriptRAW = string.sub(self.ScriptReceive, string.find(self.ScriptReceive, "<bols".."cript>")+11, string.find(self.ScriptReceive, "</bols".."cript>")-1)
+        local ScriptFileOpen = io.open(self.SavePath, "w+")
+        ScriptFileOpen:write(self.ScriptRAW)
+        ScriptFileOpen:close()
+    end
+
+    if type(self.Callback) == 'function' then
+        self.Callback(self.OnlineVersion)
+    end
+
+    self.UpdateDone = true
+end
 
 
 
