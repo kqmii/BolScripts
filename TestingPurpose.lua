@@ -20,114 +20,13 @@ local wRange = 725
 local eRange = 800
 local rDelay, rRadius, rRange, rSpeed = 0.5, 210, 2550, 1200
 
-
+local version = 1.2
 -------------
-class "ScriptUpdate"
-function ScriptUpdate:__init(LocalVersion, Host, VersionPath, ScriptPath, SavePath, CallbackUpdate, CallbackNoUpdate, CallbackNewVersion)
-    LocalVersion = LocalVersion
-    Host = Host
-    VersionPath = '/BoL/TCPUpdater/GetScript2.php?script='..self:Base64Encode(Host..VersionPath)..'&rand='..math.random(99999999)
-    ScriptPath = '/BoL/TCPUpdater/GetScript2.php?script='..self:Base64Encode(Host..ScriptPath)..'&rand='..math.random(99999999)
-    SavePath = SavePath
-    CallbackUpdate = CallbackUpdate
-    CallbackNoUpdate = CallbackNoUpdate
-    CallbackNewVersion = CallbackNewVersion
-    LuaSocket = require("socket")
-    Socket = LuaSocket.connect('sx-bol.eu', 80)
-    Socket:send("GET "..VersionPath.." HTTP/1.0\r\nHost: sx-bol.eu\r\n\r\n")
-    Socket:settimeout(0, 'b')
-    Socket:settimeout(99999999, 't')
-    LastPrint = ""
-    File = ""
-    AddTickCallback(function() self:GetOnlineVersion() end)
-end
 
-function ScriptUpdate:Base64Encode(data)
-    local b='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/'
-    return ((data:gsub('.', function(x)
-        local r,b='',x:byte()
-        for i=8,1,-1 do r=r..(b%2^i-b%2^(i-1)>0 and '1' or '0') end
-        return r;
-    end)..'0000'):gsub('%d%d%d?%d?%d?%d?', function(x)
-        if (#x < 6) then return '' end
-        local c=0
-        for i=1,6 do c=c+(x:sub(i,i)=='1' and 2^(6-i) or 0) end
-        return b:sub(c+1,c+1)
-    end)..({ '', '==', '=' })[#data%3+1])
-end
-
-function ScriptUpdate:GetOnlineVersion()
-    if Status == 'closed' then return end
-    Receive, Status, Snipped = Socket:receive(1024)
-
-    if Receive then
-        if LastPrint ~= Receive then
-            LastPrint = Receive
-            File = File .. Receive
-        end
-    end
-
-    if Snipped ~= "" and Snipped then
-        File = File .. Snipped
-    end
-    if Status == 'closed' then
-        local HeaderEnd, ContentStart = File:find('\r\n\r\n')
-        if HeaderEnd and ContentStart then
-            OnlineVersion = tonumber(File:sub(ContentStart + 1))
-            if OnlineVersion > LocalVersion then
-                if CallbackNewVersion and type(CallbackNewVersion) == 'function' then
-                    CallbackNewVersion(OnlineVersion,LocalVersion)
-                end
-                DownloadSocket = LuaSocket.connect('sx-bol.eu', 80)
-                DownloadSocket:send("GET "..ScriptPath.." HTTP/1.0\r\nHost: sx-bol.eu\r\n\r\n")
-                DownloadSocket:settimeout(0, 'b')
-                DownloadSocket:settimeout(99999999, 't')
-                LastPrint = ""
-                File = ""
-                AddTickCallback(function() self:DownloadUpdate() end)
-            else
-                if CallbackNoUpdate and type(CallbackNoUpdate) == 'function' then
-                    CallbackNoUpdate(LocalVersion)
-                end
-            end
-        else
-            print('Error: Could not get end of Header')
-        end
-    end
-end
-
-function ScriptUpdate:DownloadUpdate()
-    if DownloadStatus == 'closed' then return end
-    DownloadReceive, DownloadStatus, DownloadSnipped = DownloadSocket:receive(1024)
-
-    if DownloadReceive then
-        if LastPrint ~= DownloadReceive then
-            LastPrint = DownloadReceive
-            File = File .. DownloadReceive
-        end
-    end
-
-    if DownloadSnipped ~= "" and DownloadSnipped then
-        File = File .. DownloadSnipped
-    end
-
-    if DownloadStatus == 'closed' then
-        local HeaderEnd, ContentStart = File:find('\r\n\r\n')
-        if HeaderEnd and ContentStart then
-            local ScriptFileOpen = io.open(SavePath, "w+")
-            ScriptFileOpen:write(File:sub(ContentStart + 1))
-            ScriptFileOpen:close()
-            if CallbackUpdate and type(CallbackUpdate) == 'function' then
-                CallbackUpdate(OnlineVersion,LocalVersion)
-            end
-        end
-    end
-end------------
 
 --Au demarrage
 function OnLoad()
 	Menu() -- Menu Demarrer
-	update()
 	PrintChat ("NamiMadness by Kqmii V1.2 Loaded")
 	PrintChat ("Report any problem by pm to kqmii on bol")
 	
@@ -151,6 +50,12 @@ function OnLoad()
 		ScriptFileOpen:write(ScriptRaw)
 		ScriptFileOpen:close()
 	    end
+		SxUpdate(1,
+        "raw.githubusercontent.com",
+        "/kqmii/BolScripts/master/TestingPurpose.version",
+        "/kqmii/BolScripts/master/TestingPurpose.lua",
+        SCRIPT_PATH.."TestingPurpose.lua",
+        function(NewVersion) if NewVersion > 1 then print("<font color=\"#F0Ff8d\"><b>NamiMadness: </b></font> <font color=\"#FF0F0F\">Updated to "..NewVersion..". Please Reload with 2x F9</b></font>") else print("<font color=\"#F0Ff8d\"><b>ShadowVayne: </b></font> <font color=\"#FF0F0F\">You have the Latest Version</b></font>") end end)
 		
 
 		
@@ -161,20 +66,6 @@ function OnLoad()
 	
 end
 
-function update()
-		version = 1.2
-		print('<font color=\'#F0Ff8d\'><b>NamiMadness:</b></font> <font color=\'#FF0F0F\'>Version '..version..' loaded</font>')
-		local ToUpdate = {}
-		ToUpdate.Version = version
-		ToUpdate.Host = "raw.githubusercontent.com"
-		ToUpdate.VersionPath = "/kqmii/BolScripts/master/TestingPurpose.lua"
-		ToUpdate.ScriptPath = "/kqmii/BolScripts/master/TestingPurpose.version"
-		ToUpdate.SavePath = SCRIPT_PATH.."TestingPurpose.lua"
-		ToUpdate.CallbackUpdate = function(NewVersion,OldVersion) print("<font color=\"#F0Ff8d\"><b>NamiMadness: </b></font> <font color=\"#FF0F0F\">Updated to "..NewVersion..". Please Reload with 2x F9</b></font>") end
-		ToUpdate.CallbackNoUpdate = function(OldVersion) print("<font color=\"#F0Ff8d\"><b>NamiMadness: </b></font> <font color=\"#FF0F0F\">No Updates Found</b></font>") end
-		ToUpdate.CallbackNewVersion = function(NewVersion) print("<font color=\"#F0Ff8d\"><b>NamiMadness: </b></font> <font color=\"#FF0F0F\">New Version found ("..NewVersion.."). Please wait until its downloaded</b></font>") end
-		ScriptUpdate(ToUpdate.Version, ToUpdate.Host, ToUpdate.VersionPath, ToUpdate.ScriptPath, ToUpdate.SavePath, ToUpdate.CallbackUpdate,ToUpdate.CallbackNoUpdate, ToUpdate.CallbackNewVersion)
-end
 --Toute les 10 sec
 function OnTick()
 	ts:update()
@@ -370,7 +261,62 @@ function HpCheck(unit, HealthValue)
 		return false
 	end
 end
+-------
+class "SxUpdate"
+function SxUpdate:__init(LocalVersion, Host, VersionPath, ScriptPath, SavePath, Callback)
+    self.Callback = Callback
+    self.LocalVersion = LocalVersion
+    self.Host = Host
+    self.VersionPath = VersionPath
+    self.ScriptPath = ScriptPath
+    self.SavePath = SavePath
+    self.LuaSocket = require("socket")
+    AddTickCallback(function() self:GetOnlineVersion() end)
+    DelayAction(function() self.UpdateDone = true end, 2)
+end
 
+function SxUpdate:GetOnlineVersion()
+    if self.UpdateDone then return end
+    if not self.OnlineVersion and not self.VersionSocket then
+        self.VersionSocket = self.LuaSocket.connect("sx-bol.eu", 80)
+        self.VersionSocket:send("GET /BoL/TCPUpdater/GetScript.php?script="..self.Host..self.VersionPath.."&rand="..tostring(math.random(1000)).." HTTP/1.0\r\n\r\n")
+    end
+
+    if not self.OnlineVersion and self.VersionSocket then
+        self.VersionSocket:settimeout(0, 'b')
+        self.VersionSocket:settimeout(99999999, 't')
+        self.VersionReceive, self.VersionStatus = self.VersionSocket:receive('*a')
+    end
+
+    if not self.OnlineVersion and self.VersionSocket and self.VersionStatus ~= 'timeout' then
+        if self.VersionReceive then
+            self.OnlineVersion = tonumber(string.sub(self.VersionReceive, string.find(self.VersionReceive, "<bols".."cript>")+11, string.find(self.VersionReceive, "</bols".."cript>")-1))
+            if not self.OnlineVersion then print(self.VersionReceive) end
+        else
+            print('AutoUpdate Failed')
+            self.OnlineVersion = 0
+        end
+        self:DownloadUpdate()
+    end
+end
+
+function SxUpdate:DownloadUpdate()
+    if self.OnlineVersion > self.LocalVersion then
+        self.ScriptSocket = self.LuaSocket.connect("sx-bol.eu", 80)
+        self.ScriptSocket:send("GET /BoL/TCPUpdater/GetScript.php?script="..self.Host..self.ScriptPath.."&rand="..tostring(math.random(1000)).." HTTP/1.0\r\n\r\n")
+        self.ScriptReceive, self.ScriptStatus = self.ScriptSocket:receive('*a')
+        self.ScriptRAW = string.sub(self.ScriptReceive, string.find(self.ScriptReceive, "<bols".."cript>")+11, string.find(self.ScriptReceive, "</bols".."cript>")-1)
+        local ScriptFileOpen = io.open(self.SavePath, "w+")
+        ScriptFileOpen:write(self.ScriptRAW)
+        ScriptFileOpen:close()
+    end
+
+    if type(self.Callback) == 'function' then
+        self.Callback(self.OnlineVersion)
+    end
+
+    self.UpdateDone = true
+end
 
 
 
