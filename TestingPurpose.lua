@@ -11,7 +11,7 @@ if myHero.charName ~= "Nami" then return end
 
 --Auto Update info
 _G.AUTOUPDATE = true
-local version = "1.1.1"
+local version = "1.1"
 local UPDATE_HOST = "raw.github.com"
 local UPDATE_PATH = "/kqmii/BolScripts/master/TestingPurpose.lua".."?rand="..math.random(1,10000)
 local UPDATE_FILE_PATH = SCRIPT_PATH..GetCurrentEnv().FILE_NAME
@@ -46,7 +46,7 @@ if _G.AUTOUPDATE then
 end
 local DOWNLOADING_LIBS, DOWNLOAD_COUNT = false, 0
 local REQUIRED_LIBS = {
-	["vPrediction"] = "https://raw.githubusercontent.com/Ralphlol/BoLGit/master/VPrediction.lua",
+	["VPrediction"] = "https://raw.githubusercontent.com/Ralphlol/BoLGit/master/VPrediction.lua",
 	["SxOrbWalk"] = "https://raw.githubusercontent.com/Superx321/BoL/master/common/SxOrbWalk.lua",
 }
 function AfterDownload()
