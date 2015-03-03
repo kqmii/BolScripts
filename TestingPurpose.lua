@@ -51,8 +51,7 @@ function OnLoad()
 	    end
 		
         local MyScriptVersionAtUser = 1.2
-	    SxUpdate(MyScriptVersionAtUser , "raw.githubusercontent.com", "/kqmii/BolScripts/master/TestingPurpose.version", "/kqmii/BolScripts/master/TestingPurpose.lua",
-		SCRIPT_PATH.."/TestingPurpose.lua",
+	    SxUpdate(MyScriptVersionAtUser , "raw.githubusercontent.com", "/kqmii/BolScripts/master/TestingPurpose.version", "/kqmii/BolScripts/master/TestingPurpose.lua",SCRIPT_PATH.."/TestingPurpose.lua",)
 		function(NewVersion) if NewVersion > MyScriptVersionAtUser then print("NamiMadness from v" .. MyScriptVersionAtUser .. " to v" .. NewVersion .. ". Please reload(F9x2).") end
 		end
 		end
