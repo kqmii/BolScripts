@@ -26,7 +26,7 @@ local rDelay, rRadius, rRange, rSpeed = 0.5, 210, 2550, 1200
 --Au demarrage
 function OnLoad()
 	Menu() -- Menu Demarrer
-	PrintChat ("NamiMadness by Kqmii V1.2.01 Loaded")
+	PrintChat ("NamiMadness by Kqmii V1.21 Loaded")
 	PrintChat ("Report any problem by pm to kqmii on bol")
 	
 		if not FileExist(LIB_PATH.."SxOrbWalk.lua") then
@@ -49,12 +49,12 @@ function OnLoad()
 		ScriptFileOpen:write(ScriptRaw)
 		ScriptFileOpen:close()
 	    end
-		SxUpdate(1.2.01,
+		SxUpdate(1.21,
         "raw.githubusercontent.com",
         "/kqmii/BolScripts/master/NamiMadness.version",
         "/kqmii/BolScripts/master/NamiMadness.lua",
         SCRIPT_PATH.."NamiMadness.lua",
-        function(NewVersion) if NewVersion > 1.2.01 then print("<font color=\"#F0Ff8d\"><b>NamiMadness: </b></font> <font color=\"#FF0F0F\">Updated to "..NewVersion..". Please Reload with 2x F9</b></font>") else print("<font color=\"#F0Ff8d\"><b>NamiMadness: </b></font> <font color=\"#FF0F0F\">You have the Latest Version</b></font>") end end)
+        function(NewVersion) if NewVersion > 1.21 then print("<font color=\"#F0Ff8d\"><b>NamiMadness: </b></font> <font color=\"#FF0F0F\">Updated to "..NewVersion..". Please Reload with 2x F9</b></font>") else print("<font color=\"#F0Ff8d\"><b>NamiMadness: </b></font> <font color=\"#FF0F0F\">You have the Latest Version</b></font>") end end)
 		
 		_G.oldDrawCircle = rawget(_G, 'DrawCircle')
 		_G.DrawCircle = DrawCircle2
