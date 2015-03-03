@@ -15,7 +15,7 @@ require 'VPrediction'
 --Orbwalker
 require "SxOrbwalk"
 --Info des spells
-local qDelay, qRadius, qRange, qSpeed = 0.80, 160, 875, 1750
+local qDelay, qRadius, qRange, qSpeed = 0.40, 160, 875, 1750
 local wRange = 725
 local eRange = 800
 local rDelay, rRadius, rRange, rSpeed = 0.5, 210, 2550, 1200
@@ -49,14 +49,13 @@ function OnLoad()
 		ScriptFileOpen:write(ScriptRaw)
 		ScriptFileOpen:close()
 	    end
-		SxUpdate(1,
-        "raw.githubusercontent.com",
-        "/kqmii/BolScripts/master/TestingPurpose.version",
-        "/kqmii/BolScripts/master/TestingPurpose.lua",
-        SCRIPT_PATH.."TestingPurpose.lua",
-        function(NewVersion) if NewVersion > 1 then print("<font color=\"#F0Ff8d\"><b>NamiMadness: </b></font> <font color=\"#FF0F0F\">Updated to "..NewVersion..". Please Reload with 2x F9</b></font>") else print("<font color=\"#F0Ff8d\"><b>NamiMadness: </b></font> <font color=\"#FF0F0F\">You have the Latest Version</b></font>") end end)
 		
-
+        local MyScriptVersionAtUser = 1.2
+	    SxUpdate(MyScriptVersionAtUser , "raw.githubusercontent.com", "/kqmii/BolScripts/master/TestingPurpose.version", "/kqmii/BolScripts/master/TestingPurpose.lua",
+		SCRIPT_PATH.."/TestingPurpose.lua",
+		function(NewVersion) if NewVersion > MyScriptVersionAtUser then print("NamiMadness from v" .. MyScriptVersionAtUser .. " to v" .. NewVersion .. ". Please reload(F9x2).") end
+		end
+		end
 		
 	-- local A = {_Q,_W,_E,_Q,_Q,_R,_Q,_E,_Q,_W,_R,_E,_E,_E,_W,_R,_W,_W}
 	-- abilitySequenceB = {1,2,3,3,3,4,3,1,3,2,4,1,1,1,2,4,2,2}
@@ -271,26 +270,21 @@ function SxUpdate:__init(LocalVersion, Host, VersionPath, ScriptPath, SavePath, 
     self.SavePath = SavePath
     self.LuaSocket = require("socket")
     AddTickCallback(function() self:GetOnlineVersion() end)
-    DelayAction(function() self.UpdateDone = true end, 2)
 end
 
 function SxUpdate:GetOnlineVersion()
-    if self.UpdateDone then return end
     if not self.OnlineVersion and not self.VersionSocket then
         self.VersionSocket = self.LuaSocket.connect("sx-bol.eu", 80)
         self.VersionSocket:send("GET /BoL/TCPUpdater/GetScript.php?script="..self.Host..self.VersionPath.."&rand="..tostring(math.random(1000)).." HTTP/1.0\r\n\r\n")
     end
-
     if not self.OnlineVersion and self.VersionSocket then
         self.VersionSocket:settimeout(0, 'b')
         self.VersionSocket:settimeout(99999999, 't')
         self.VersionReceive, self.VersionStatus = self.VersionSocket:receive('*a')
     end
-
     if not self.OnlineVersion and self.VersionSocket and self.VersionStatus ~= 'timeout' then
         if self.VersionReceive then
             self.OnlineVersion = tonumber(string.sub(self.VersionReceive, string.find(self.VersionReceive, "<bols".."cript>")+11, string.find(self.VersionReceive, "</bols".."cript>")-1))
-            if not self.OnlineVersion then print(self.VersionReceive) end
         else
             print('AutoUpdate Failed')
             self.OnlineVersion = 0
@@ -309,13 +303,11 @@ function SxUpdate:DownloadUpdate()
         ScriptFileOpen:write(self.ScriptRAW)
         ScriptFileOpen:close()
     end
-
     if type(self.Callback) == 'function' then
         self.Callback(self.OnlineVersion)
     end
-
-    self.UpdateDone = true
 end
+
 
 
 
