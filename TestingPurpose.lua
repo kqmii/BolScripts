@@ -126,7 +126,7 @@ end------------
 
 class 'TestingPurpose'
 function TestingPurpose:_init()
-    self.version = 1.2
+    self.version = 1.1
     print('<font color=\'#F0Ff8d\'><b>NamiMadness:</b></font> <font color=\'#FF0F0F\'>Version '..self.version..' loaded</font>')
     local ToUpdate = {}
     ToUpdate.Version = self.version
@@ -143,7 +143,7 @@ end
 --Au demarrage
 function OnLoad()
 	Menu() -- Menu Demarrer
-	PrintChat ("NamiMadness by Kqmii V1.1 Loaded")
+	PrintChat ("NamiMadness by Kqmii V1.2 Loaded")
 	PrintChat ("Report any problem by pm to kqmii on bol")
 	
 		if not FileExist(LIB_PATH.."SxOrbWalk.lua") then
@@ -165,9 +165,22 @@ function OnLoad()
 		ScriptFileOpen = io.open(LIB_PATH.."VPrediction.lua", "w+")
 		ScriptFileOpen:write(ScriptRaw)
 		ScriptFileOpen:close()
-    end
-    
-    TestingPurpose()
+	    end
+		
+		self.version = 1.2
+		print('<font color=\'#F0Ff8d\'><b>NamiMadness:</b></font> <font color=\'#FF0F0F\'>Version '..self.version..' loaded</font>')
+		local ToUpdate = {}
+		ToUpdate.Version = self.version
+		ToUpdate.Host = "raw.githubusercontent.com"
+		ToUpdate.VersionPath = "/kqmii/BolScripts/master/TestingPurpose.lua"
+		ToUpdate.ScriptPath = "/kqmii/BolScripts/master/TestingPurpose.version"
+		ToUpdate.SavePath = SCRIPT_PATH.."TestingPurpose.lua"
+		ToUpdate.CallbackUpdate = function(NewVersion,OldVersion) print("<font color=\"#F0Ff8d\"><b>NamiMadness: </b></font> <font color=\"#FF0F0F\">Updated to "..NewVersion..". Please Reload with 2x F9</b></font>") end
+		ToUpdate.CallbackNoUpdate = function(OldVersion) print("<font color=\"#F0Ff8d\"><b>NamiMadness: </b></font> <font color=\"#FF0F0F\">No Updates Found</b></font>") end
+		ToUpdate.CallbackNewVersion = function(NewVersion) print("<font color=\"#F0Ff8d\"><b>NamiMadness: </b></font> <font color=\"#FF0F0F\">New Version found ("..NewVersion.."). Please wait until its downloaded</b></font>") end
+		ScriptUpdate(ToUpdate.Version, ToUpdate.Host, ToUpdate.VersionPath, ToUpdate.ScriptPath, ToUpdate.SavePath, ToUpdate.CallbackUpdate,ToUpdate.CallbackNoUpdate, ToUpdate.CallbackNewVersion)
+
+		
 	-- local A = {_Q,_W,_E,_Q,_Q,_R,_Q,_E,_Q,_W,_R,_E,_E,_E,_W,_R,_W,_W}
 	-- abilitySequenceB = {1,2,3,3,3,4,3,1,3,2,4,1,1,1,2,4,2,2}
 	-- abilitySequenceC = {1,2,3,2,2,4,2,3,2,1,4,3,3,3,1,4,1,1}
