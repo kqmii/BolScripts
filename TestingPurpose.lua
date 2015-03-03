@@ -44,6 +44,7 @@ if _G.AUTOUPDATE then
 		AutoupdaterMsg("Error downloading version info")
 	end
 end
+local DOWNLOADING_LIBS, DOWNLOAD_COUNT = false, 0
 local REQUIRED_LIBS = {
 	["vPrediction"] = "https://raw.githubusercontent.com/Ralphlol/BoLGit/master/VPrediction.lua",
 	["SxOrbWalk"] = "https://raw.githubusercontent.com/Superx321/BoL/master/common/SxOrbWalk.lua",
