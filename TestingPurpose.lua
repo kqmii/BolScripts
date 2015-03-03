@@ -20,7 +20,6 @@ local wRange = 725
 local eRange = 800
 local rDelay, rRadius, rRange, rSpeed = 0.5, 210, 2550, 1200
 
-local version = 1.2
 -------------
 
 
