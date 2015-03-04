@@ -90,7 +90,7 @@ end
 --			  Callbacks			     --
 ---------------------------------------
 function OnLoad()
-	PrintChat("<font color=\"#33CC99\"><b>LeonaMadness by Kqmii </b></font>"..currentVersion.."<font color=\"#33CC99\"><b> Loaded</b></font>")
+	PrintChat("<font color=\"#33CC99\"><b>LeonaMadness by Kqmii V </b></font>"..currentVersion.."<font color=\"#33CC99\"><b> Loaded</b></font>")
 	PrintChat ("<b>Report any problem by pm to kqmii on bol</b>")
 	Menu()
 	updateScript()
