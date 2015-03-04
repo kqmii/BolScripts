@@ -5,19 +5,7 @@
 --*******************************--
 --|||||||||||||||||||||||||||||||--
 --*******************************--
---DONE
--- CC rotation so they don't stack on each other
--- Combo sbtw
--- Drawings W, E, R + text on target + circle on target
--- Lag free circles
--- Auto target priority arranger
--- Engage with ult key
--- Vprediction
--- SxOrbwalk
--- Auto updater
 
---TO DO
---auto update
 if myHero.charName ~= "Leona" then return end
 
 require 'VPrediction'
@@ -36,7 +24,7 @@ local wColor, eColor, rColor = ARGB(255, 204, 153, 0), ARGB(255, 204, 102, 0), A
 ---------------------------------------
 local currentVersion = 1.0
 function updateScript()
-	SxUpdate(1.0, "raw.githubusercontent.com", "/kqmii/BolScripts/master/NamiMadness.version", "/kqmii/BolScripts/master/NamiMadness.lua", SCRIPT_PATH.."NamiMadness.lua",
+	SxUpdate(1.0, "raw.githubusercontent.com", "/kqmii/BolScripts/master/LeonaMadness.version", "/kqmii/BolScripts/master/LeonaMadness.lua", SCRIPT_PATH.."LeonaMadness.lua",
 		function(NewVersion) 
 			if NewVersion > 1.0 then 
 				print("<font color=\"#F0Ff8d\"><b>LeonaMadness : </b></font> <font color=\"#FF0F0F\">Updated to "..NewVersion..". Please Reload with 2x F9</b></font>") 
@@ -102,7 +90,8 @@ end
 --			  Callbacks			     --
 ---------------------------------------
 function OnLoad()
-	PrintChat("<b>LeonaMadness by Kqmii Early Alpha</b>")
+	PrintChat("<font color=\"#33CC99\"><b>LeonaMadness by Kqmii </b></font>"..currentVersion.."<font color=\"#33CC99\"><b> Loaded</b></font>")
+	PrintChat ("<b>Report any problem by pm to kqmii on bol</b>")
 	Menu()
 	
 	if heroManager.iCount == 10 then
