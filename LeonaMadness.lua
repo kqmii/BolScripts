@@ -5,7 +5,6 @@
 --*******************************--
 --|||||||||||||||||||||||||||||||--
 --*******************************--
-
 if myHero.charName ~= "Leona" then return end
 
 require 'VPrediction'
@@ -19,14 +18,18 @@ local rDelay, rRadius, rRange, rSpeed = 0.625, 220, 1200, math.huge
 
 local wColor, eColor, rColor = ARGB(255, 204, 153, 0), ARGB(255, 204, 102, 0), ARGB(255, 204, 51, 0)
 
+local targetSelected = nil
+
+local tRange = 900
+
 ---------------------------------------
 --			   Updater				 --
 ---------------------------------------
-local currentVersion = 1.0
+local currentVersion = 1.1
 function updateScript()
-	SxUpdate(1.0, "raw.githubusercontent.com", "/kqmii/BolScripts/master/LeonaMadness.version", "/kqmii/BolScripts/master/LeonaMadness.lua", SCRIPT_PATH.."LeonaMadness.lua",
+	SxUpdate(1.1, "raw.githubusercontent.com", "/kqmii/BolScripts/master/LeonaMadness.version", "/kqmii/BolScripts/master/LeonaMadness.lua", SCRIPT_PATH.."LeonaMadness.lua",
 		function(NewVersion) 
-			if NewVersion > 1.0 then 
+			if NewVersion > 1.1 then 
 				print("<font color=\"#F0Ff8d\"><b>LeonaMadness : </b></font> <font color=\"#FF0F0F\">Updated to "..NewVersion..". Please Reload with 2x F9</b></font>") 
 			else 
 				print("<font color=\"#F0Ff8d\"><b>LeonaMadness : </b></font> <font color=\"#FF0F0F\">You have the Latest Version</b></font>") 
@@ -91,7 +94,9 @@ end
 ---------------------------------------
 function OnLoad()
 	PrintChat("<font color=\"#33CC99\"><b>LeonaMadness by Kqmii </b></font>"..currentVersion.."<font color=\"#33CC99\"><b> Loaded</b></font>")
-	PrintChat ("<b>Report any problem by pm to kqmii on bol</b>")
+	PrintChat("<b>Report any problem by pm to kqmii on bol</b>")
+	PrintChat("<font color=\"#0066FF\"><b>v 1.2 - Added tower range indicator under drawings settings</b></font>")
+	PrintChat("<font color=\"#0066FF\"><b>     - Added Select target with Left click</b></font>")
 	Menu()
 	updateScript()
 	
@@ -126,9 +131,13 @@ end
 ---------------------------------------
 function OnDraw()
 	if not myHero.dead then
-		if ValidTarget(ts.target) then
-			DrawCircle(ts.target.x, ts.target.y, ts.target.z, 150, ARGB(255, 102, 204, 51))
-			DrawCircle(ts.target.x, ts.target.y, ts.target.z, 175, ARGB(255, 102, 204, 51))
+		if ValidTarget(targetSelected) then
+				DrawCircle(targetSelected.x, targetSelected.y, targetSelected.z, 150, ARGB(255, 102, 204, 51))
+				DrawCircle(targetSelected.x, targetSelected.y, targetSelected.z, 175, ARGB(255, 102, 204, 51))
+		else if ValidTarget(ts.target) then
+				DrawCircle(ts.target.x, ts.target.y, ts.target.z, 150, ARGB(255, 102, 204, 51))
+				DrawCircle(ts.target.x, ts.target.y, ts.target.z, 175, ARGB(255, 102, 204, 51))
+			end
 		end
 		if leoCFG.draw.wDraw then
 			DrawCircle(myHero.x, myHero.y, myHero.z, wRange, wColor)
@@ -138,7 +147,14 @@ function OnDraw()
 		end
 		if leoCFG.draw.rDraw then
 			DrawCircle(myHero.x, myHero.y, myHero.z, rRange, rColor)
-		end		
+		end	
+		if leoCFG.draw.tDraw then
+			for i, tower in pairs(GetTurrets()) do
+				if GetDistance(tower) < 2000 then
+					DrawCircle(tower.x, tower.y, tower.z, tRange, ARGB(190,0,255,0))
+				end
+			end
+		end
 	end
 end
 function DrawCircleNextLvl(x, y, z, radius, width, color, chordlength)
@@ -195,6 +211,7 @@ function Menu()
 			leoCFG.draw:addParam("wDraw", "W range", SCRIPT_PARAM_ONOFF, true)
 			leoCFG.draw:addParam("eDraw", "E range", SCRIPT_PARAM_ONOFF, true)
 			leoCFG.draw:addParam("rDraw", "R range", SCRIPT_PARAM_ONOFF, true)
+			leoCFG.draw:addParam("tDraw", "Turret range", SCRIPT_PARAM_ONOFF, false)
 			leoCFG.draw:addParam("Lfc", "Activate Lag Free Circles", SCRIPT_PARAM_ONOFF, false)
 			leoCFG.draw:addParam("CL", "Lag Free Circles Quality", 4, 75, 75, 2000, 0)
 			leoCFG.draw:addParam("Width", "Lag Free Circles Width", 4, 2, 1, 10, 0)
@@ -222,6 +239,7 @@ function MoveToMouse()
 		myHero:MoveTo(mousePos.x, mousePos.z)
 	end
 end
+
 ---------------------------------------
 --			Spells config            --
 ---------------------------------------
@@ -267,6 +285,29 @@ function ultiEngage()
 			if MainTargetHitChance >= 2 and GetDistance(AOECastPosition) < leoCFG.uErange and nTargets >= leoCFG.uEnumber and RREADY then
 				CastSpell(_R, AOECastPosition.x, AOECastPosition.z)
 			end
+	end
+end
+function OnWndMsg(msg, key)
+	if msg == WM_LBUTTONDOWN then
+		local enemyDistance, enemySelected = 0, nil
+		for i, enemy in pairs(GetEnemyHeroes()) do
+			if ValidTarget(enemy) and GetDistance(enemy, mousePos) < 200 then 
+				if GetDistance(enemy, mousePos) <= enemyDistance or not enemySelected then
+					enemyDistance = GetDistance(enemy, mousePos)
+					enemySelected = enemy
+				end
+			end
+		end
+		if enemySelected then
+			if not targetSelected or targetSelected.hash ~= enemySelected.hash then
+				targetSelected = enemySelected
+				print('Target selected: '..targetSelected.charName)
+			else
+				targetSelected = nil
+				print('Target unselected!')
+			end
+		end
+		
 	end
 end
 ---------------------------------------
