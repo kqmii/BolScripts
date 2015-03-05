@@ -7,7 +7,7 @@
 --*******************************--
 if myHero.charName ~= "Nami" then return end
 
-local currentVersion = 1.32
+local currentVersion = 1.33
 
 require 'VPrediction'
 require "SxOrbwalk"
@@ -301,6 +301,7 @@ function UseQ()
 		end
 	end
 end
+local ADdamage = 0
 function UseW()
 	if NamiCFG.Combo.wUse then
 		if ts.target ~= nil and WREADY then
@@ -310,18 +311,26 @@ function UseW()
 end
 function UseE()
 	if NamiCFG.Combo.eUse then
-	local allies = GetAllyHeroes()
-		for i, ally in pairs(allies) do
+		-- ADC finder if find use E on him
+		for i, ally in pairs(GetAllyHeroes()) do
 			if not ally.dead then
-				if GetDistance(ally) < eRange and EREADY then
-					CastSpell(_E, ally)
-				else 
-					if ts.target ~= nil and ValidTarget(ts.target, 800) then
-						CastSpell(_E, myHero)
-					end
+				if ally.totalDamage > ADdamage and GetDistance(myHero, ally) < eRange and EREADY then
+					ADC = ally
+					ADdamage = ally.totalDamage
 				end
 			end
 		end
+		if EREADY and ADC ~= nil and GetDistance(myHero, ally) < eRange then
+			CastSpell(_E, ADC)
+		end
+		if EREADY and ADC == nil then
+			CastSpell(_E, myHero)
+		end
+		--if no adc use it on me
+			-- if ts.target ~= nil and ValidTarget(ts.target, eRange) and EREADY then
+				-- CastSpell(_E, myHero)
+			-- end
+		
 	end
 end
 function UseR()
