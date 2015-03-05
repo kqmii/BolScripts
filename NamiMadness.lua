@@ -13,14 +13,15 @@ local qDelay, qRadius, qRange, qSpeed = 0.40, 200, 875, 1750
 local wRange = 725
 local eRange = 800
 local rDelay, rRadius, rRange, rSpeed = 0.5, 210, 2550, 1200
+local tRange = 900
 ---------------------------------------
 --			   Updater				 --
 ---------------------------------------
-local currentVersion = 1.23
+local currentVersion = 1.3
 function updateScript()
-	SxUpdate(1.23, "raw.githubusercontent.com", "/kqmii/BolScripts/master/NamiMadness.version", "/kqmii/BolScripts/master/NamiMadness.lua", SCRIPT_PATH.."NamiMadness.lua",
+	SxUpdate(1.3, "raw.githubusercontent.com", "/kqmii/BolScripts/master/NamiMadness.version", "/kqmii/BolScripts/master/NamiMadness.lua", SCRIPT_PATH.."NamiMadness.lua",
 		function(NewVersion) 
-			if NewVersion > 1.23 then 
+			if NewVersion > 1.3 then 
 				print("<font color=\"#F0Ff8d\"><b>NamiMadness: </b></font> <font color=\"#FF0F0F\">Updated to "..NewVersion..". Please Reload with 2x F9</b></font>") 
 			else 
 				print("<font color=\"#F0Ff8d\"><b>NamiMadness: </b></font> <font color=\"#FF0F0F\">You have the Latest Version</b></font>") 
@@ -89,6 +90,7 @@ function OnLoad()
 	
 	Menu()
 	updateScript()
+	
 			if not FileExist(LIB_PATH.."VPrediction.lua") then
 			LuaSocket = require("socket")
 			ScriptSocket = LuaSocket.connect("sx-bol.eu", 80)
@@ -110,11 +112,14 @@ function OnLoad()
 			ScriptFileOpen:close()
 	        end
 
-	_G.oldDrawCircle = rawget(_G, 'DrawCircle')
-	_G.DrawCircle = DrawCircle2
-
+		_G.oldDrawCircle = rawget(_G, 'DrawCircle')
+		_G.DrawCircle = DrawCircle2
+	
+		if heroManager.iCount == 10 then
 			arrangeTarget()
-
+		else
+			PrintChat("Not enought champion to arrange priority")
+		end
 end
 function OnTick()
 	ts:update()
@@ -124,6 +129,7 @@ function OnTick()
 	RREADY = (myHero:CanUseSpell(_R) == READY)
 	
 	if NamiCFG.Harass.HarassKey then
+		MoveToMouse()
 		HarassQ()
 	end
 	
@@ -145,21 +151,28 @@ end
 --			   Drawings				 --
 ---------------------------------------
 function OnDraw()
-	if NamiCFG.draw.qDraw then
-		DrawCircle(myHero.x, myHero.y, myHero.z, qRange, ARGB(255, 0, 0, 255))
-	end
-	if NamiCFG.draw.wDraw then
-		DrawCircle(myHero.x, myHero.y, myHero.z, wRange, ARGB(255, 0, 51, 255))
-	end
-	if NamiCFG.draw.eDraw then
-		DrawCircle(myHero.x, myHero.y, myHero.z, eRange, ARGB(255, 0, 102, 255))
-	end
-	if NamiCFG.draw.rangeDraw then
-		DrawCircle(myHero.x, myHero.y, myHero.z, 675, ARGB(255, 0, 255, 0))
-	end
 	if not myHero.dead then
+		if NamiCFG.draw.qDraw then
+			DrawCircle(myHero.x, myHero.y, myHero.z, qRange, ARGB(255, 0, 0, 255))
+		end
+		if NamiCFG.draw.wDraw then
+			DrawCircle(myHero.x, myHero.y, myHero.z, wRange, ARGB(255, 0, 51, 255))
+		end
+		if NamiCFG.draw.eDraw then
+			DrawCircle(myHero.x, myHero.y, myHero.z, eRange, ARGB(255, 0, 102, 255))
+		end
+		if NamiCFG.draw.rangeDraw then
+			DrawCircle(myHero.x, myHero.y, myHero.z, 675, ARGB(255, 0, 255, 0))
+		end
 		if ValidTarget(ts.target) then
 			DrawCircle(ts.target.x, ts.target.y, ts.target.z, 150, 0xCC0033)
+		end
+		if NamiCFG.draw.tDraw then
+			for i, tower in pairs(GetTurrets()) do
+				if GetDistance(tower) < 2000 then
+					DrawCircle(tower.x, tower.y, tower.z, tRange, ARGB(190,0,255,0))
+				end
+			end
 		end
 	end
 end
@@ -223,6 +236,7 @@ function Menu()
 			NamiCFG.draw:addParam("qDraw", "Q range", SCRIPT_PARAM_ONOFF, true)
 			NamiCFG.draw:addParam("wDraw", "W range", SCRIPT_PARAM_ONOFF, true)
 			NamiCFG.draw:addParam("eDraw", "E range", SCRIPT_PARAM_ONOFF, true)
+			NamiCFG.draw:addParam("tDraw", "Towers range", SCRIPT_PARAM_ONOFF, false)
 			NamiCFG.draw:addParam("rangeDraw", "Auto attack range", SCRIPT_PARAM_ONOFF, true)
 			NamiCFG.draw:addParam("Lfc", "Activate Lag Free Circles", SCRIPT_PARAM_ONOFF, false)
 			NamiCFG.draw:addParam("CL", "Lag Free Circles Quality", 4, 75, 75, 2000, 0)
@@ -327,6 +341,11 @@ function HarassQ()
 		end
 	end
 end
+function MoveToMouse()
+	if NamiCFG.Harass.HarassKey then
+		myHero:MoveTo(mousePos.x, mousePos.z)
+	end
+end
 ---------------------------------------
 --		 Custom target arranger      --
 ---------------------------------------
@@ -353,3 +372,6 @@ function SetPriority(table, hero, priority)
 		end
 	end
 end
+---------------------------------------
+--			 ScriptStatus			 --
+---------------------------------------
