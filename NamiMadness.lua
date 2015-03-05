@@ -7,7 +7,7 @@
 --*******************************--
 if myHero.charName ~= "Nami" then return end
 
-local currentVersion = 1.33
+local currentVersion = 1.34
 
 require 'VPrediction'
 require "SxOrbwalk"
@@ -17,6 +17,53 @@ local wRange = 725
 local eRange = 800
 local rDelay, rRadius, rRange, rSpeed = 0.5, 210, 2550, 1200
 local tRange = 900
+local stunList = {
+["ahriseducedoom"] = true,
+["caitlynyordletrapdebuff"] = true,
+["aatroxqknockup"] = true,
+["rupturetarget"] = true,
+["EliseHumanE"] = true,
+["HowlingGaleSpell"] = true,
+["jarvanivdragonstrikeph2"] = true,
+["braumstundebuff"] = true,
+["karmaspiritbindroot"] = true, 
+["LuxLightBindingMis"] = true,
+["lissandrawfrozen"] = true,
+["maokaiunstablegrowthroot"] = true,
+["DarkBindingMissile"] = true,
+["nautilusanchordragroot"] = true,
+["RunePrison"] = true,
+["Taunt"] = true,
+["Stun"] = true,
+["swainshadowgrasproot"] = true,
+["threshqfakeknockup"] = true,
+["velkozestun"] = true,
+["virdunkstun"] = true,
+["viktorgravitonfieldstun"] = true,
+["supression"] = true,
+["yasuoq3mis"] = true,
+["zyragraspingrootshold"] = true,
+["CurseoftheSadMummy"] = true,
+["braumpulselineknockup"] = true,
+["lissandraenemy2"] = true,
+["sejuaniglacialprison"] = true,
+["SonaR"] = true,
+["zyrabramblezoneknockup"] = true,
+["infiniteduresssound"] = true,
+["chronorevive"] = true,
+["katarinarsound"] = true,
+["AbsoluteZero"] = true,
+["Meditate"] = true,
+["pantheonesound"] = true,
+["zhonyasringshield"] = true,
+["fearmonger_marker"] = true,
+["AlZaharNetherGrasp"] = true,
+["missfortunebulletsound"] = true, 
+["VelkozR"] = true, 
+["monkeykingspinknockup"] = true,
+["unstoppableforceestun"] = true,
+["lissandrarself"] = true
+}
 ---------------------------------------
 --			   Updater				 --
 ---------------------------------------
@@ -147,6 +194,10 @@ function OnTick()
 		AutoHealAllies()
 	end
 					
+	if NamiCFG.Combo.autoQ then
+		autoQ()
+	end
+	
 	if NamiCFG.draw.Lfc then _G.DrawCircle = DrawCircle2 else _G.DrawCircle = _G.oldDrawCircle end
 end
 ---------------------------------------
@@ -227,6 +278,7 @@ function Menu()
 	
 		NamiCFG:addSubMenu("--["..myHero.charName.."]-- Combo", "Combo")
 			NamiCFG.Combo:addParam("qUse", "Use Q", SCRIPT_PARAM_ONOFF, true)
+			NamiCFG.Combo:addParam("autoQ", "Auto use Q on CC'ed Champ", SCRIPT_PARAM_ONOFF, true)
 			NamiCFG.Combo:addParam("wUse", "Use W", SCRIPT_PARAM_ONOFF, true)
 			NamiCFG.Combo:addParam("eUse", "Use E", SCRIPT_PARAM_ONOFF, true)
 			NamiCFG.Combo:addParam("rUse", "Use R", SCRIPT_PARAM_ONOFF, true)
@@ -284,6 +336,19 @@ function HpCheck(unit, HealthValue)
 		return false
 	end
 end
+function IsOnCC(target)
+	assert(type(target) == 'userdata', "IsOnCC: Wrong type. Expected userdata got: "..tostring(type(target)))
+	for i  =  1, target.buffCount do
+		tBuff = target:getBuff(i)
+		if BuffIsValid(tBuff) and stunList[tBuff.name] then
+			return true
+		end	
+	end
+	return false
+end
+---------------------------------------
+--			   CC LIST				 --
+---------------------------------------
 ---------------------------------------
 --			Spells config            --
 ---------------------------------------
@@ -301,6 +366,20 @@ function UseQ()
 		end
 	end
 end
+function autoQ()
+	for i, target in pairs(GetEnemyHeroes()) do
+		if target ~= nil and QREADY then
+			if IsOnCC(target) == true then
+				local CastPosition, HitChance, Position = VP:GetCircularCastPosition(target, qDelay, qRadius, qRange, qSpeed)
+					if HitChance >=2 and GetDistance(CastPosition) < qRange then
+						CastSpell(_Q, CastPosition.x, CastPosition.z)
+					end
+				end
+			end
+		end
+	
+end
+
 local ADdamage = 0
 function UseW()
 	if NamiCFG.Combo.wUse then
