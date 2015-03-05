@@ -7,7 +7,7 @@
 --*******************************--
 if myHero.charName ~= "Nami" then return end
 
-local currentVersion = 1.31
+local currentVersion = 1.32
 
 require 'VPrediction'
 require "SxOrbwalk"
@@ -166,8 +166,13 @@ function OnDraw()
 		if NamiCFG.draw.rangeDraw then
 			DrawCircle(myHero.x, myHero.y, myHero.z, 675, ARGB(255, 0, 255, 0))
 		end
-		if ValidTarget(ts.target) then
-			DrawCircle(ts.target.x, ts.target.y, ts.target.z, 150, 0xCC0033)
+		if ValidTarget(targetSelected) then
+				DrawCircle(targetSelected.x, targetSelected.y, targetSelected.z, 150, ARGB(255, 102, 204, 51))
+				DrawCircle(targetSelected.x, targetSelected.y, targetSelected.z, 175, ARGB(255, 102, 204, 51))
+		else if ValidTarget(ts.target) then
+				DrawCircle(ts.target.x, ts.target.y, ts.target.z, 150, ARGB(255, 102, 204, 51))
+				DrawCircle(ts.target.x, ts.target.y, ts.target.z, 175, ARGB(255, 102, 204, 51))
+			end
 		end
 		if NamiCFG.draw.tDraw then
 			for i, tower in pairs(GetTurrets()) do
@@ -346,6 +351,29 @@ end
 function MoveToMouse()
 	if NamiCFG.Harass.HarassKey then
 		myHero:MoveTo(mousePos.x, mousePos.z)
+	end
+end
+function OnWndMsg(msg, key)
+	if msg == WM_LBUTTONDOWN then
+		local enemyDistance, enemySelected = 0, nil
+		for i, enemy in pairs(GetEnemyHeroes()) do
+			if ValidTarget(enemy) and GetDistance(enemy, mousePos) < 200 then 
+				if GetDistance(enemy, mousePos) <= enemyDistance or not enemySelected then
+					enemyDistance = GetDistance(enemy, mousePos)
+					enemySelected = enemy
+				end
+			end
+		end
+		if enemySelected then
+			if not targetSelected or targetSelected.hash ~= enemySelected.hash then
+				targetSelected = enemySelected
+				print('Target selected: '..targetSelected.charName)
+			else
+				targetSelected = nil
+				print('Target unselected!')
+			end
+		end
+		
 	end
 end
 ---------------------------------------
