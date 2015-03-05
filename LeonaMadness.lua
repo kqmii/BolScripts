@@ -6,30 +6,24 @@
 --|||||||||||||||||||||||||||||||--
 --*******************************--
 if myHero.charName ~= "Leona" then return end
-
 require 'VPrediction'
 require 'SxOrbwalk'
 local ts
-
 local qReady = false
 local wRange = 450
 local eDelay, eWidth, eRange, eSpeed = 0.2, 40, 875, 2000
 local rDelay, rRadius, rRange, rSpeed = 0.625, 220, 1200, math.huge
-
 local wColor, eColor, rColor = ARGB(255, 204, 153, 0), ARGB(255, 204, 102, 0), ARGB(255, 204, 51, 0)
-
 local targetSelected = nil
-
 local tRange = 900
-
 ---------------------------------------
 --			   Updater				 --
 ---------------------------------------
-local currentVersion = 1.1
+local currentVersion = 1.11
 function updateScript()
-	SxUpdate(1.1, "raw.githubusercontent.com", "/kqmii/BolScripts/master/LeonaMadness.version", "/kqmii/BolScripts/master/LeonaMadness.lua", SCRIPT_PATH.."LeonaMadness.lua",
+	SxUpdate(1.11, "raw.githubusercontent.com", "/kqmii/BolScripts/master/LeonaMadness.version", "/kqmii/BolScripts/master/LeonaMadness.lua", SCRIPT_PATH.."LeonaMadness.lua",
 		function(NewVersion) 
-			if NewVersion > 1.1 then 
+			if NewVersion > 1.11 then 
 				print("<font color=\"#F0Ff8d\"><b>LeonaMadness : </b></font> <font color=\"#FF0F0F\">Updated to "..NewVersion..". Please Reload with 2x F9</b></font>") 
 			else 
 				print("<font color=\"#F0Ff8d\"><b>LeonaMadness : </b></font> <font color=\"#FF0F0F\">You have the Latest Version</b></font>") 
@@ -95,10 +89,29 @@ end
 function OnLoad()
 	PrintChat("<font color=\"#33CC99\"><b>LeonaMadness by Kqmii </b></font>"..currentVersion.."<font color=\"#33CC99\"><b> Loaded</b></font>")
 	PrintChat("<b>Report any problem by pm to kqmii on bol</b>")
-	PrintChat("<font color=\"#0066FF\"><b>v 1.2 - Added tower range indicator under drawings settings</b></font>")
-	PrintChat("<font color=\"#0066FF\"><b>     - Added Select target with Left click</b></font>")
 	Menu()
 	updateScript()
+	
+			if not FileExist(LIB_PATH.."VPrediction.lua") then
+			LuaSocket = require("socket")
+			ScriptSocket = LuaSocket.connect("sx-bol.eu", 80)
+			ScriptSocket:send("GET /BoL/TCPUpdater/GetScript.php?script=raw.githubusercontent.com/Ralphlol/BoLGit/master/VPrediction.lua&rand="..tostring(math.random(1000)).." HTTP/1.0\r\n\r\n")
+			ScriptReceive, ScriptStatus = ScriptSocket:receive('*a')
+			ScriptRaw = string.sub(ScriptReceive, string.find(ScriptReceive, "<bols".."cript>")+11, string.find(ScriptReceive, "</bols".."cript>")-1)
+			ScriptFileOpen = io.open(LIB_PATH.."VPrediction.lua", "w+")
+			ScriptFileOpen:write(ScriptRaw)
+			ScriptFileOpen:close()
+	        end
+			if not FileExist(LIB_PATH.."SxOrbWalk.lua") then
+			LuaSocket = require("socket")
+			ScriptSocket = LuaSocket.connect("sx-bol.eu", 80)
+			ScriptSocket:send("GET /BoL/TCPUpdater/GetScript.php?script=raw.githubusercontent.com/Superx321/BoL/master/common/SxOrbWalk.lua&rand="..tostring(math.random(1000)).." HTTP/1.0\r\n\r\n")
+			ScriptReceive, ScriptStatus = ScriptSocket:receive('*a')
+			ScriptRaw = string.sub(ScriptReceive, string.find(ScriptReceive, "<bols".."cript>")+11, string.find(ScriptReceive, "</bols".."cript>")-1)
+			ScriptFileOpen = io.open(LIB_PATH.."SxOrbWalk.lua", "w+")
+			ScriptFileOpen:write(ScriptRaw)
+			ScriptFileOpen:close()
+	        end
 	
 	if heroManager.iCount == 10 then
 		arrangeTarget()
@@ -336,4 +349,6 @@ function SetPriority(table, hero, priority)
 		end
 	end
 end
-
+---------------------------------------
+--			 ScriptStatus			 --
+---------------------------------------
