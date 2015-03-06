@@ -7,7 +7,7 @@
 --*******************************--
 if myHero.charName ~= "Leona" then return end
 
-local currentVersion = 1.12
+local currentVersion = 1.13
 
 require 'VPrediction'
 require 'SxOrbwalk'
@@ -155,13 +155,13 @@ function OnDraw()
 				DrawCircle(ts.target.x, ts.target.y, ts.target.z, 175, ARGB(255, 102, 204, 51))
 			end
 		end
-		if leoCFG.draw.wDraw then
+		if leoCFG.draw.wDraw and WREADY then
 			DrawCircle(myHero.x, myHero.y, myHero.z, wRange, wColor)
 		end
-		if leoCFG.draw.eDraw then
+		if leoCFG.draw.eDraw and EREADY then
 			DrawCircle(myHero.x, myHero.y, myHero.z, eRange, eColor)
 		end
-		if leoCFG.draw.rDraw then
+		if leoCFG.draw.rDraw and RREADY then
 			DrawCircle(myHero.x, myHero.y, myHero.z, rRange, rColor)
 		end	
 		if leoCFG.draw.tDraw then
@@ -239,7 +239,7 @@ function Combo()
 	if leoCFG.Combo.eUse then
 		useE()
 	end
-	if leoCFG.Combo.wUse then
+	if leoCFG.Combo.wUse  then
 		useW()
 	end
 	if leoCFG.Combo.qUse then
@@ -261,46 +261,61 @@ end
 ---------------------------------------
 function useQ()
 	if leoCFG.Combo.qUse then
-		if ts.target ~= nil and GetDistance(ts.target) <= 200 and QREADY then
-			CastSpell(_Q)
+		for i, target in pairs(GetEnemyHeroes()) do
+			if not target.dead then
+				if GetDistance(target) <= 200 and QREADY then
+					CastSpell(_Q)
+				end
+			end
 		end
 	end
 end
 function useW()
 	if leoCFG.Combo.wUse then
-		if ts.target ~= nil and GetDistance(ts.target) <= wRange and WREADY then
-			CastSpell(_W)
+		for i, target in ipairs(GetEnemyHeroes()) do
+			if not target.dead then
+				if GetDistance(target) <= wRange and WREADY then
+					CastSpell(_W)
+				end
+			end
 		end
 	end
 end
 function useE()
 	if leoCFG.Combo.eUse then
 		for i, target in pairs(GetEnemyHeroes()) do
-			if ts.target ~= nil and EREADY then
-				local CastPosition, HitChance, Position = VP:GetLineCastPosition(target, eDelay, eWidth, eRange, eSpeed, myHero, false)
-					if CastPosition and HitChance >= 2 and GetDistance(CastPosition) < eRange then
-						CastSpell(_E, CastPosition.x, CastPosition.z)
+			if not target.dead then
+				if target ~= nil and EREADY then
+					local CastPosition, HitChance, Position = VP:GetLineCastPosition(target, eDelay, eWidth, eRange, eSpeed, myHero, false)
+						if CastPosition and HitChance >= 2 and GetDistance(CastPosition) < eRange then
+							CastSpell(_E, CastPosition.x, CastPosition.z)
+						end
 					end
+				end
 			end
-		end
 	end
 end
 function ulti()
 	if leoCFG.Combo.rUse then
 		for i, target in pairs(GetEnemyHeroes()) do
-			local AOECastPosition, MainTargetHitChance, nTargets = VP:GetCircularAOECastPosition(target, rDelay, rRadius, leoCFG.Combo.uConfig.mnRange, rSpeed, myHero)
-				if MainTargetHitChance >= 2 and GetDistance(AOECastPosition) < leoCFG.Combo.uConfig.mnRange and nTargets >= leoCFG.Combo.uConfig.noEnemy and RREADY then
-					CastSpell(_R, AOECastPosition.x, AOECastPosition.z)
-				end
+			if not target.dead then 
+				local AOECastPosition, MainTargetHitChance, nTargets = VP:GetCircularAOECastPosition(target, rDelay, rRadius, leoCFG.Combo.uConfig.mnRange, rSpeed, myHero)
+					if MainTargetHitChance >= 2 and GetDistance(AOECastPosition) < leoCFG.Combo.uConfig.mnRange and nTargets >= leoCFG.Combo.uConfig.noEnemy and RREADY then
+						CastSpell(_R, AOECastPosition.x, AOECastPosition.z)
+					end
+			end
 		end
 	end
 end
 function ultiEngage()
 	for i, target in pairs(GetEnemyHeroes()) do
-		local AOECastPosition, MainTargetHitChance, nTargets = VP:GetCircularAOECastPosition(target, rDelay, rRadius, leoCFG.uErange, rSpeed, myHero)
-			if MainTargetHitChance >= 2 and GetDistance(AOECastPosition) < leoCFG.uErange and nTargets >= leoCFG.uEnumber and RREADY then
-				CastSpell(_R, AOECastPosition.x, AOECastPosition.z)
-			end
+		if not target.dead then
+			local AOECastPosition, MainTargetHitChance, nTargets = VP:GetCircularAOECastPosition(target, rDelay, rRadius, leoCFG.uErange, rSpeed, myHero)
+				if MainTargetHitChance >= 2 and GetDistance(AOECastPosition) < leoCFG.uErange and nTargets >= leoCFG.uEnumber and RREADY then
+					CastSpell(_R, AOECastPosition.x, AOECastPosition.z)
+				end
+			
+		end
 	end
 end
 function OnWndMsg(msg, key)
