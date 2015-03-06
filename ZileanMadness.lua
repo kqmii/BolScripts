@@ -2,7 +2,7 @@
 --		ZileanMadness by Kqmii		 --
 ---------------------------------------
 
-local currentVersion = 1.0
+local currentVersion = 1
 
 if myHero.charName ~= "Zilean" then return end
 
