@@ -112,7 +112,7 @@ function OnLoad()
 		_G.oldDrawCircle = rawget(_G, 'DrawCircle')
 		_G.DrawCircle = DrawCircle2			
 		Menu()
-		
+		updateScript()
 		if heroManager.iCount == 10 then
 			arrangeTarget()
 		else
