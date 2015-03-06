@@ -2,7 +2,7 @@
 --		ZileanMadness by Kqmii		 --
 ---------------------------------------
 
-local currentVersion = 1
+local currentVersion = 1.1
 
 if myHero.charName ~= "Zilean" then return end
 
@@ -11,7 +11,7 @@ require 'SxOrbwalk'
 
 local ts
 
-local qRange, qDelay, qRadius, qSpeed = 900, 0.4, 160, 2000
+local qRange, qDelay, qRadius, qSpeed = 900, 0.5, 180, math.huge
 local eRange = 700
 local rRange = 900
 local tRange = 925
@@ -112,7 +112,7 @@ function OnLoad()
 		_G.oldDrawCircle = rawget(_G, 'DrawCircle')
 		_G.DrawCircle = DrawCircle2			
 		Menu()
-		updateScript()
+		
 		if heroManager.iCount == 10 then
 			arrangeTarget()
 		else
@@ -201,34 +201,36 @@ function Menu()
 	------------------------------------------------------------------------------
 	------------------------------------------------------------------------------
 		zilCFG:addSubMenu("--["..myHero.charName.."]-- Combo", "combo")
-			zilCFG.combo:addSubMenu("Auto E config", "eConfig")
-				zilCFG.combo.eConfig:addParam("autoAllyLowHp", "Auto E ally low Hp", SCRIPT_PARAM_ONOFF, false)
-				zilCFG.combo.eConfig:addParam("allyHpPercent", "Ally Hp % for E", SCRIPT_PARAM_SLICE, 30, 0, 100, 0)
-				zilCFG.combo.eConfig:addParam("autoSelfLowHp", "Auto E if my hero low hp", SCRIPT_PARAM_ONOFF, false)
-				zilCFG.combo.eConfig:addParam("selfHpPercent", "Self hp % for E", SCRIPT_PARAM_SLICE, 30, 0, 100, 0)
-
 			zilCFG.combo:addSubMenu("E Combo Config", "basicE")
 				zilCFG.combo.basicE:addParam("eEnemyLowHp", "Use E on Enemy low Hp", SCRIPT_PARAM_ONOFF, true)
 				zilCFG.combo.basicE:addParam("eEnemyPercent", "% to use E", SCRIPT_PARAM_SLICE, 40, 0, 100, 0)
 				zilCFG.combo.basicE:addParam("eEnemyAD", "Use E on Enemy most AD", SCRIPT_PARAM_ONOFF, true)
-				zilCFG.combo.basicE:addParam("EmyHero", "Use E on my Hero", SCRIPT_PARAM_ONOFF, true)				
-				
-			zilCFG.combo:addSubMenu("Auto W config", "wConfig")
-				zilCFG.combo.wConfig:addParam("qAutoW", "Auto W if Q on CD", SCRIPT_PARAM_ONOFF, false)
-				zilCFG.combo.wConfig:addParam("eAutoW", "Auto W if E on CD", SCRIPT_PARAM_ONOFF, false)
-				zilCFG.combo.wConfig:addParam("manaW", "Stop auto W at % mana", SCRIPT_PARAM_SLICE, 50, 0, 100, 0)
-				
-			zilCFG.combo:addSubMenu("Auto R config", "autoR")
-			zilCFG.combo:addSubMenu("Use R on wich Champ", "heroR")
-				for i, ally in pairs(GetAllyHeroes()) do
-					zilCFG.combo.heroR:addParam(ally.charName, ally.charName, SCRIPT_PARAM_ONOFF, true)
-				end
-				zilCFG.combo.autoR:addParam("autoRuse", "Use Auto R", SCRIPT_PARAM_ONOFF, true)
-				zilCFG.combo.autoR:addParam("rHpPercent", "% of hp left to Auto R", SCRIPT_PARAM_SLICE, 20, 0, 100, 0)
-				
+				zilCFG.combo.basicE:addParam("EmyHero", "Use E on my Hero", SCRIPT_PARAM_ONOFF, true)
 			zilCFG.combo:addParam("qUse", "Use Q", SCRIPT_PARAM_ONOFF, true)
 			zilCFG.combo:addParam("eUse", "Use E", SCRIPT_PARAM_ONOFF, true)
-			zilCFG.combo:addParam("comboKey", "Combo key", SCRIPT_PARAM_ONKEYDOWN, false, string.byte(" "))
+			zilCFG.combo:addParam("comboKey", "Combo key", SCRIPT_PARAM_ONKEYDOWN, false, string.byte(" "))		
+	------------------------------------------------------------------------------
+	------------------------------------------------------------------------------
+		zilCFG:addSubMenu("--["..myHero.charName.."]-- Auto E config", "eConfig")
+			zilCFG.eConfig:addParam("autoAllyLowHp", "Auto E ally low Hp", SCRIPT_PARAM_ONOFF, false)
+			zilCFG.eConfig:addParam("allyHpPercent", "Ally Hp % for E", SCRIPT_PARAM_SLICE, 30, 0, 100, 0)
+			zilCFG.eConfig:addParam("autoSelfLowHp", "Auto E if my hero low hp", SCRIPT_PARAM_ONOFF, false)
+			zilCFG.eConfig:addParam("selfHpPercent", "Self hp % for E", SCRIPT_PARAM_SLICE, 30, 0, 100, 0)
+	------------------------------------------------------------------------------
+	------------------------------------------------------------------------------
+		zilCFG:addSubMenu("--["..myHero.charName.."]-- Auto W config", "wConfig")
+			zilCFG.wConfig:addParam("qAutoW", "Auto W if Q on CD", SCRIPT_PARAM_ONOFF, false)
+			zilCFG.wConfig:addParam("eAutoW", "Auto W if E on CD", SCRIPT_PARAM_ONOFF, false)
+			zilCFG.wConfig:addParam("manaW", "Stop auto W at % mana", SCRIPT_PARAM_SLICE, 50, 0, 100, 0)
+	------------------------------------------------------------------------------
+	------------------------------------------------------------------------------
+			zilCFG:addSubMenu("--["..myHero.charName.."]-- Auto R config", "autoR")
+			zilCFG.autoR:addSubMenu("Use R on wich Champ", "heroR")
+				for i, ally in pairs(GetAllyHeroes()) do
+					zilCFG.autoR.heroR:addParam(ally.charName, ally.charName, SCRIPT_PARAM_ONOFF, true)
+				end
+				zilCFG.autoR:addParam("autoRuse", "Use Auto R", SCRIPT_PARAM_ONOFF, true)
+				zilCFG.autoR:addParam("rHpPercent", "% of hp left to Auto R", SCRIPT_PARAM_SLICE, 20, 0, 100, 0)				
 	-----------------------------------------------------------------------------	
 	-----------------------------------------------------------------------------
 		zilCFG:addSubMenu("--["..myHero.charName.."]-- Drawings", "draw")
@@ -356,31 +358,34 @@ end
 end
 function autoE()
 --ally low hp
-if zilCFG.combo.eConfig.autoAllyLowHp then
+if zilCFG.eConfig.autoAllyLowHp then
+if not Recalling() then
 	for i, ally in pairs(GetAllyHeroes()) do
 		if not ally.dead then
-			if GetDistance(myHero, ally) < eRange and HpCheck(ally, zilCFG.combo.eConfig.allyHpPercent) and EREADY then
+			if GetDistance(myHero, ally) < eRange and HpCheck(ally, zilCFG.eConfig.allyHpPercent) and EREADY then
 				CastSpell(_E, ally)
+			end
+		end
+end	end
+end
+--ally too far 
+if zilCFG.eConfig.autoSelfLowHp then
+		if not Recalling() then
+			if EREADY and zilCFG.eConfig.autoSelfLowHp and HpCheck(myHero, zilCFG.eConfig.selfHpPercent) then
+				CastSpell(_E, myHero)
 			end
 		end
 	end
 end
---ally too far 
-if zilCFG.combo.eConfig.autoSelfLowHp then
-	if EREADY and zilCFG.combo.eConfig.autoSelfLowHp and HpCheck(myHero, zilCFG.combo.eConfig.selfHpPercent) then
-		CastSpell(_E, myHero)
-	end
-end
-end
 function autoW()
-		if not ManaCheck(myHero, zilCFG.combo.wConfig.manaW) then
+		if not ManaCheck(myHero, zilCFG.wConfig.manaW) then
 			if not Recalling() then
-				if zilCFG.combo.wConfig.qAutoW then
+				if zilCFG.wConfig.qAutoW then
 					if QREADY == false then
 						CastSpell(_W)
 					end
 				end
-				if zilCFG.combo.wConfig.eAutoW then
+				if zilCFG.wConfig.eAutoW then
 					if EREADY == false then
 						CastSpell(_W)
 					end
@@ -388,20 +393,20 @@ function autoW()
 			end
 		end
 	end
-
-
 function autoR()
-	if zilCFG.combo.autoR.autoRuse then
-		if RREADY and HpCheck(myHero, zilCFG.combo.autoR.rHpPercent) and EnemyNear(1000, myHero) > 0 then
+	if zilCFG.autoR.autoRuse then
+	if not Recalling() then
+		if RREADY and HpCheck(myHero, zilCFG.autoR.rHpPercent) and EnemyNear(1000, myHero) > 0 then
 			CastSpell(_R, myHero)
 		end
 		for i, ally in pairs(GetAllyHeroes()) do
-			if zilCFG.combo.heroR[ally.charName] then
-				if HpCheck(ally, zilCFG.combo.autoR.rHpPercent) and GetDistance(ally) < 900 and EnemyNear(1000, ally) > 0 and RREADY then
+			if zilCFG.autoR.heroR[ally.charName] then
+				if HpCheck(ally, zilCFG.autoR.rHpPercent) and GetDistance(ally) < 900 and EnemyNear(1000, ally) > 0 and RREADY then
 					CastSpell(_R, ally)
 				end
 			end
 		end
+	end
 	end
 end
 ---------------------------------------
