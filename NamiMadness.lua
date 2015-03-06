@@ -7,7 +7,7 @@
 --*******************************--
 if myHero.charName ~= "Nami" then return end
 
-local currentVersion = 1.35
+local currentVersion = 1.36
 
 require 'VPrediction'
 require "SxOrbwalk"
@@ -399,7 +399,7 @@ function UseE()
 		if EREADY and ADC ~= nil and GetDistance(myHero, ally) < eRange then
 			CastSpell(_E, ADC)
 		end
-		if EREADY and ADC == nil then
+		if EREADY and ValidTarget(ts.target) then
 			CastSpell(_E, myHero)
 		end
 		--if no adc use it on me
