@@ -7,12 +7,12 @@
 --*******************************--
 if myHero.charName ~= "Nami" then return end
 
-local currentVersion = 1.34
+local currentVersion = 1.35
 
 require 'VPrediction'
 require "SxOrbwalk"
 local ts
-local qDelay, qRadius, qRange, qSpeed = 0.40, 200, 875, 1750
+local qDelay, qRadius, qRange, qSpeed = 0.40, 200, 875, math.huge
 local wRange = 725
 local eRange = 800
 local rDelay, rRadius, rRange, rSpeed = 0.5, 210, 2550, 1200
