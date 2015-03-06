@@ -7,7 +7,7 @@
 --*******************************--
 if myHero.charName ~= "Leona" then return end
 
-local currentVersion = 1.13
+local currentVersion = 1.14
 
 require 'VPrediction'
 require 'SxOrbwalk'
@@ -265,6 +265,7 @@ function useQ()
 			if not target.dead then
 				if GetDistance(target) <= 200 and QREADY then
 					CastSpell(_Q)
+					myHero:Attack(target)
 				end
 			end
 		end
