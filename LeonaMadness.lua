@@ -7,7 +7,7 @@
 --*******************************--
 if myHero.charName ~= "Leona" then return end
 
-local currentVersion = 1.15
+local currentVersion = 1.16
 
 require 'VPrediction'
 require 'SxOrbwalk'
@@ -259,9 +259,10 @@ function Menu()
 				leoCFG.Combo.uConfig:addParam("noEnemy", "Mini enemies to ultimate on", SCRIPT_PARAM_SLICE, 1, 1, 5, 0)
 			leoCFG.Combo:addParam("comboKey", "Combo key", SCRIPT_PARAM_ONKEYDOWN, false, string.byte(" "))
 			
-		leoCFG:addParam("eMaxRange", "Change E Max range", SCRIPT_PARAM_LIST,875, {"875","865","855","845","835","825","815","800"})
+		leoCFG:addParam("eMaxRange", "Change E Max range", SCRIPT_PARAM_LIST, 1, {"875","865","855","845","835","825","815","800"})
 		
-		leoCFG:addParam("wDestroy", "Auto AA-Q-AA-AA Wards", SCRIPT_PARAM_ONKEYTOGGLE, false, GetKey("S"))
+		leoCFG:addParam("wDestroy", "Destroy ward toggle", SCRIPT_PARAM_ONKEYTOGGLE, false, GetKey("S"))
+		leoCFG:addParam("wKey", "Destroy ward combo =", SCRIPT_PARAM_LIST, 2, {"AA>Q>AA>AA", "AA>Q>AA"})
 		
 		leoCFG:addParam("uErange", "Minimal range to engage with ult", SCRIPT_PARAM_SLICE, 600, 0, 1200, 0)
 		leoCFG:addParam("uEnumber", "How many enemies to engage ", SCRIPT_PARAM_SLICE, 1, 1, 5, 0)
@@ -313,10 +314,17 @@ function wardDestroy()
 local addDelay = ((myHero.attackSpeed)+0.1)
 	for i, ward in pairs(Wards) do
 		if ward.team == TEAM_ENEMY and ward.visible == true and GetDistance(ward, myHero) < leonaRange then
-			myHero:Attack(ward)
-			DelayAction(function() CastSpell(_Q) end, addDelay)
-			myHero:Attack(ward)
-			myHero:Attack(ward)
+			if leoCFG.wKey == 1 then
+				myHero:Attack(ward)
+				DelayAction(function() CastSpell(_Q) end, addDelay)
+				myHero:Attack(ward)
+				myHero:Attack(ward)
+			end
+			if leoCFG.wKey == 2 then
+				myHero:Attack(ward)
+				DelayAction(function() CastSpell(_Q) end, addDelay)
+				myHero:Attack(ward)
+			end
 		end
 	end
 end
