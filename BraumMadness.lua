@@ -204,7 +204,7 @@ Champions = {
 			["DianaArc"] = {name = "DianaArc", spellName = "DianaArc", castDelay = 250, projectileName = "Diana_Q_trail.troy", projectileSpeed = 1600, range = 1000, radius = 195, type="circular", unBlockable = false, blockable = true, danger = 0},
 	}},
 		["Jayce"] = {charName = "Jayce", skillshots = {
-			["jayceshockblast"] = {name = "jayceshockblast", spellName = "jayceshockblast!", castDelay = 250, projectileName = "JayceOrbLightning.troy", projectileSpeed = 1450, range = 1050, radius = 70, type = "line", unBlockable = false, blockable = true, danger = 0},
+			["jayceshockblast"] = {name = "jayceshockblast", spellName = "jayceshockblast", castDelay = 250, projectileName = "JayceOrbLightning.troy", projectileSpeed = 1450, range = 1050, radius = 70, type = "line", unBlockable = false, blockable = true, danger = 0},
 			["Q2"] = {name = "Q2", spellName = "JayceShockBlast", castDelay = 250, projectileName = "JayceOrbLightningCharged.troy", projectileSpeed = 2350, range = 1600, radius = 70, type = "line", unBlockable = false, blockable = true, danger = 0},
 	}},
 		["Nami"] = {charName = "Nami", skillshots = {
