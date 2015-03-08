@@ -3,7 +3,7 @@
 ------------------------------
 if myHero.charName ~= "Braum" then return end
 
-local currentVersion = 1.1
+local currentVersion = 1.2
 
 require 'VPrediction'
 require 'SxOrbwalk'
@@ -304,8 +304,8 @@ Champions = {
 		["Heimerdinger"] = {charName = "Heimerdinger", skillshots = {
 			["HeimerdingerW"] = {name = "HeimerdingerW", spellName = "HeimerdingerW", castDelay = 250, projectileName = "Heimerdinger_Base_w_Mis.troy", projectileSpeed = 1846, range = 1230, radius = 80, type = "line", blockable = true, danger = 0},
 			["HeimerdingerW"] = {name = "HeimerdingerW", spellName = "HeimerdingerW", castDelay = 260, projectileName = "Heimerdinger_Base_W_Mis_Ult.troy", projectileSpeed = 1846, range = 1230, radius = 80, type = "line", blockable = true, danger = 0},		
-			["Storm Grenade"] = {name = "Storm Grenade", spellName = "Storm Grenade", castDelay = 250, projectileName = "Heimerdinger_Base_E_Mis.troy", projectileSpeed = 2500, range = 970, radius = 80, type = "circular", blockable = true, danger = 1},
-			["Storm Grenade"] = {name = "Storm Grenade", spellName = "Storm Grenade", castDelay = 250, projectileName = "Heimerdinger_Base_E_Mis_Ult.troy", projectileSpeed = 2500, range = 970, radius = 80, type = "circular", blockable = true, danger = 1},		
+			["Storm Grenade"] = {name = "Storm Grenade", spellName = "StormGrenade", castDelay = 250, projectileName = "Heimerdinger_Base_E_Mis.troy", projectileSpeed = 2500, range = 970, radius = 80, type = "circular", blockable = true, danger = 1},
+			["Storm Grenade"] = {name = "Storm Grenade", spellName = "StormGrenade", castDelay = 250, projectileName = "Heimerdinger_Base_E_Mis_Ult.troy", projectileSpeed = 2500, range = 970, radius = 80, type = "circular", blockable = true, danger = 1},		
 	}}, 
 		["Annie"] = {charName = "Annie", skillshots = {
 			["Disintegrate"] = {name = "Disintegrate", spellName = "Disintegrate", castDelay = 250, projectileName = "Disintegrate.troy", projectileSpeed = 1500, range = 875, radius = 140, unBlockable = false, blockable = true, danger = 1}
