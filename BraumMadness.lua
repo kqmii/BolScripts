@@ -1,14 +1,7 @@
 ------------------------------
 --	BraumMadness by Kqmii	--
 ------------------------------
--- To-do
--- Auto E skillshot myHero [OK]
--- Q Harass // mana manager [OK]
--- W Gap closer ally/minion [OK]
--- W to save ally if targeted by skillshot or if low hp
--- R if x enemy , hitchance [OK]
--- Drawings [OK]
-------------------------------
+
 if myHero.charName ~= "Braum" then return end
 
 local currentVersion = 1
