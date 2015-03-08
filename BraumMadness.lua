@@ -1,10 +1,9 @@
 ------------------------------
 --	BraumMadness by Kqmii	--
 ------------------------------
-
 if myHero.charName ~= "Braum" then return end
 
-local currentVersion = 1
+local currentVersion = 1.1
 
 require 'VPrediction'
 require 'SxOrbwalk'
@@ -556,11 +555,13 @@ function OnProcessSpell(object, spellProc)
 								if braumCFG.debug then PrintChat("Found E blockage --4--") end
 								if EREADY and braumCFG.eSpells[spellProc.name] then
 									if braumCFG.debug then PrintChat("E Block") end
-										if not spellProc.endPos.x ~= ally.x+20 and spellProc.endPos.z ~= ally.z+20 then
-											CastSpell(_W, ally)
-											CastSpell(_E, object.x, object.z)
+										if GetDistance(ally, myHero) < wRange then
+											if not spellProc.endPos.x ~= ally.x+20 and spellProc.endPos.z ~= ally.z+20 then
+												CastSpell(_W, ally)
+												CastSpell(_E, object.x, object.z)
+											end
 										end
-									end
+									end	
 								end
 							end
 						end
