@@ -3,15 +3,15 @@
 ------------------------------
 if myHero.charName ~= "Braum" then return end
 
-local currentVersion = 1.2
+local currentVersion = 1.3
 
 require 'VPrediction'
 require 'SxOrbwalk'
 
-local qRange, qWidth, qSpeed, qDelay = 1000, 120, math.huge, 0
-local wRange, wWidth = 660, 120
+local qRange, qWidth, qSpeed, qDelay = 1000, 120, math.huge, 0.2
+local wRange = 650
 local eRange, eWidth = 1200, 120
-local rRange, rWidth, rSpeed, rDelay = 1250, 100, math.huge, 510
+local rRange, rWidth, rSpeed, rDelay = 1250, 210, math.huge, 0.5
 local ts
 local gEnemy = GetEnemyHeroes()
 local gAlly = GetAllyHeroes()
@@ -455,11 +455,11 @@ function Menu()
 					braumCFG.combo.rSettings:addParam("rUse", "Use R", SCRIPT_PARAM_ONOFF, true)
 					braumCFG.combo.rSettings:addParam("minR", "Min Enemies to R", SCRIPT_PARAM_SLICE, 1, 0, 5, 0)
 					braumCFG.combo.rSettings:addParam("rHitChance", "R Hitchance 1/low, 2/high..", SCRIPT_PARAM_SLICE, 2, 0, 3, 0)
-					
+			braumCFG.combo:addParam("qCD", "If Q is on CD, don't combo", SCRIPT_PARAM_ONOFF, true)	
 			braumCFG.combo:addParam("comboKey", "Combo key", SCRIPT_PARAM_ONKEYDOWN, false, string.byte(" "))
 			
 		braumCFG:addSubMenu("--["..myHero.charName.."]-- Harass", "harass")
-			braumCFG.harass:addParam("qHarassToggle", "Harass key", SCRIPT_PARAM_ONKEYDOWN, false, string.byte("T"))
+			braumCFG.harass:addParam("qHarassToggle", "Harass toggle key", SCRIPT_PARAM_ONKEYTOGGLE, false, GetKey("T"))
 			braumCFG.harass:addParam("manaHarass", "Stop harass below % mana", SCRIPT_PARAM_SLICE, 40, 0, 100, 0)
 		
 		braumCFG:addParam("wSaveAlly", "W-E ally if incoming Skillshot", SCRIPT_PARAM_ONOFF, true)
@@ -598,14 +598,19 @@ function unBlockableSpells()
 	end
 end
 function Combo()
-	if braumCFG.combo.qUse then
-		UseQ()
+	if braumCFG.combo.qCD then
+		qOnCd()
 	end
-	if braumCFG.combo.wSettings.wGapCloser then
-		GapcloserW()
-	end
-	if braumCFG.combo.rSettings.rUse then
-		UseR()
+	if not braumCFG.combo.qCD then
+		if braumCFG.combo.qUse then
+			UseQ()
+		end
+		if braumCFG.combo.wSettings.wGapCloser then
+			GapcloserW()
+		end
+		if braumCFG.combo.rSettings.rUse then
+			UseR()
+		end
 	end
 end
 function ManaCheck(unit, ManaValue)
@@ -646,6 +651,21 @@ function OnWndMsg(msg, key)
 			end
 		end
 		
+	end
+end
+function qOnCd()
+	if QREADY == false then
+	return end
+	if QREADY == true then
+		if braumCFG.combo.qUse then
+			UseQ()
+		end
+		if braumCFG.combo.wSettings.wGapCloser then
+			GapcloserW()
+		end
+		if braumCFG.combo.rSettings.rUse then
+			UseR()
+		end
 	end
 end
 ---------------------------------------
