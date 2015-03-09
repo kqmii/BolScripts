@@ -496,86 +496,42 @@ function Menu()
 end
 --Auto E
 function OnProcessSpell(object, spellProc)
-	if object.isMe and spellProc.name:lower():find("recall") then
-		--PrintChat(spellProc.name)
-	end
-	
-	if myHero.dead then return end
-	
-	if braumCFG.autoE and EREADY then
-		if object.team ~= player.team and string.find(spellProc.name, "Basic") == nil then
-			if Champions[object.charName] ~= nil then
-				skillshot = Champions[object.charName].skillshots[spellProc.name]
-				if skillshot ~= nil and skillshot.blockable == true and not skillshot.unBlockable then
-					range = skillshot.range
-					if braumCFG.debug then PrintChat("Found E blockage") end
-					if not spellProc.startPos then
-						spellProc.startPos.x = object.x
-						spellProc.startPos.z = object.z
-					end
-					if braumCFG.debug then PrintChat("Found E blockage --2--") end
-					if GetDistance(spellProc.startPos) <= range then
-						if braumCFG.debug then PrintChat("Found E blockage --3--") end 
-						if GetDistance(spellProc.endPos) <= eRange then
-							if braumCFG.debug then PrintChat("Found E blockage --4--") end
-							if EREADY and braumCFG.eSpells[spellProc.name] then
-								if braumCFG.debug then PrintChat("E Block") end
-									if not spellProc.endPos.x ~= myHero.x+20 and spellProc.endPos.z ~= myHero.z+20 then
-										CastSpell(_E, object.x, object.z)
-									end
-								end
-							end
-						end
-					end
-				end
-				if skillshot ~= nil and skillshot.unBlockable then
-					if unBlockable == nil then
-						unBlockableSpell = skillshot
-						unBlockableObject = object
-				end
-			end
-		end
-	end
-	if braumCFG.wSaveAlly and EREADY and WREADY then
-		for i, ally in pairs(gAlly) do
+		if myHero.dead then return end
+		for i, ally in pairs(GetAllyHeroes()) do
 			if object.team ~= player.team and string.find(spellProc.name, "Basic") == nil then
 				if Champions[object.charName] ~= nil then
 					skillshot = Champions[object.charName].skillshots[spellProc.name]
 					if skillshot ~= nil and skillshot.blockable == true and not skillshot.unBlockable then
 						range = skillshot.range
-						if braumCFG.debug then PrintChat("Found E blockage") end
 						if not spellProc.startPos then
 							spellProc.startPos.x = object.x
 							spellProc.startPos.z = object.z
 						end
-						if braumCFG.debug then PrintChat("Found E blockage --2--") end
-						if GetDistance(spellProc.startPos) <= range then
-							if braumCFG.debug then PrintChat("Found E blockage --3--") end 
-							if GetDistance(spellProc.endPos) <= eRange then
-								if braumCFG.debug then PrintChat("Found E blockage --4--") end
-								if EREADY and braumCFG.eSpells[spellProc.name] then
-									if braumCFG.debug then PrintChat("E Block") end
-										if GetDistance(ally, myHero) < wRange then
-											if not spellProc.endPos.x ~= ally.x+20 and spellProc.endPos.z ~= ally.z+20 then
-												CastSpell(_W, ally)
-												CastSpell(_E, object.x, object.z)
-											end
-										end
-									end	
+						if GetDistance(spellProc.startPos) <= range and GetDistance(spellProc.endPos) <= eRange then
+							if braumCFG.eSpells[spellProc.name] then
+								if EREADY then
+									if spellProc.endPos.x ~= myHero.x+20 and spellProc.endPos.z ~= myHero.z+20 and braumCFG.autoE then
+										CastSpell(_E, object.x, object.z)
+									end
+									if spellProc.endPos.x ~= ally.x+20 and spellProc.endPos.z ~= ally.z+20 and GetDistance(ally, myHero) < wRange and braumCFG.wSaveAlly and WREADY then
+										CastSpell(_W, ally)
+										CastSpell(_E, object.x, object.z)
+									end
 								end
 							end
 						end
-					end
-					if skillshot ~= nil and skillshot.unBlockable then
-						if unBlockable == nil then
-							unBlockableSpell = skillshot
-							unBlockableObject = object
+						if skillshot ~= nil and skillshot.unBlockable then
+							if unBlockable == nil then
+								unBlockableSpell = skillshot
+								unBlockableObject = object
+							end
+						end
 					end
 				end
 			end
-		end
+		end 
 	end
-end
+
 function unBlockableSpells()
 	if unBlockableSpell.spellName == "KatarinaR" and unBlockableObject.charName == "Katarina" then
 		local object = unBlockableObject
