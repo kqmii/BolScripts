@@ -7,7 +7,7 @@
 --*******************************--
 if myHero.charName ~= "Nami" then return end
 
-local currentVersion = 1.36
+local currentVersion = 1.37
 
 require 'VPrediction'
 require "SxOrbwalk"
@@ -399,7 +399,7 @@ function UseE()
 		if EREADY and ADC ~= nil and GetDistance(myHero, ally) < eRange then
 			CastSpell(_E, ADC)
 		end
-		if EREADY and ValidTarget(ts.target) then
+		if EREADY and ADC == nil then
 			CastSpell(_E, myHero)
 		end
 		--if no adc use it on me
@@ -410,11 +410,13 @@ function UseE()
 	end
 end
 function UseR()
-	for i, target in pairs(GetEnemyHeroes()) do
-		if target ~= nil and ValidTarget(ts.target) then
-			local AOECastPosition, MainTargetHitChance, nTargets = VP:GetLineAOECastPosition(ts.target, rDelay, rRadius, NamiCFG.Combo.mnRange, rSpeed, myHero)
-			if MainTargetHitChance >= 2 and GetDistance(AOECastPosition) < NamiCFG.Combo.ultConf.mnRange and nTargets >= NamiCFG.Combo.ultConf.mnChar and RREADY then
-			CastSpell(_R, AOECastPosition.x, AOECastPosition.z)
+	if NamiCFG.Combo.rUse then
+		for i, target in pairs(GetEnemyHeroes()) do
+			if target ~= nil and ValidTarget(ts.target) then
+				local AOECastPosition, MainTargetHitChance, nTargets = VP:GetLineAOECastPosition(ts.target, rDelay, rRadius, NamiCFG.Combo.mnRange, rSpeed, myHero)
+				if MainTargetHitChance >= 2 and GetDistance(AOECastPosition) < NamiCFG.Combo.ultConf.mnRange and nTargets >= NamiCFG.Combo.ultConf.mnChar and RREADY then
+				CastSpell(_R, AOECastPosition.x, AOECastPosition.z)
+				end
 			end
 		end
 	end
