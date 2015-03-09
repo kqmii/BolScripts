@@ -3,7 +3,7 @@
 ------------------------------
 if myHero.charName ~= "Braum" then return end
 
-local currentVersion = 1.3
+local currentVersion = 1.4
 
 require 'VPrediction'
 require 'SxOrbwalk'
@@ -68,7 +68,7 @@ Champions = {
 			["EzrealMysticShot"] = {name = "Mystic Shot", spellName = "EzrealMysticShot", castDelay = 250, projectileName = "Ezreal_mysticshot_mis.troy", projectileSpeed = 2000, range = 1200, radius = 80, type = "line", unBlockable = false, blockable = true, danger = 0},
 			["EzrealEssenceFlux"] = {name = "Essence Flux", spellName = "EzrealEssenceFlux", castDelay = 250, projectileName = "Ezreal_essenceflux_mis.troy", projectileSpeed = 1500, range = 1050, radius = 80, type = "line", unBlockable = false, blockable = true, danger = 0},
 			["EzrealMysticShotPulse"] = {name = "MysticShot Pulse", spellName = "EzrealMysticShotPulse", castDelay = 250, projectileName = "Ezreal_mysticshot_mis.troy", projectileSpeed = 2000, range = 1200, radius = 80, type = "line", unBlockable = false, blockable = true, danger = 0},
-			["EzrealTrueshotBarrage"] = {name = "Trueshot Barrage", spellName = "EzrealTrueshotBarrage", castDelay = 1000, projectileName = "Ezreal_TrueShot_mis.troy", projectileSpeed = 2000, range = 20000, radius = 160, type = "line", unBlockable = true, blockable = true, danger = 0},
+			["EzrealTrueshotBarrage"] = {name = "Trueshot Barrage", spellName = "EzrealTrueshotBarrage", castDelay = 1000, projectileName = "Ezreal_TrueShot_mis.troy", projectileSpeed = 2000, range = 20000, radius = 160, type = "line", unBlockable = false, blockable = true, danger = 0},
 	}},
 		["Ahri"] = {charName = "Ahri", skillshots = {
 			["AhriOrbofDeception"] = {name = "Orb of Deception", spellName = "AhriOrbofDeception", castDelay = 250, projectileName = "Ahri_Orb_mis.troy", projectileSpeed = 1750, range = 900, radius = 100, type = "line", unBlockable = false, blockable = true, danger = 0},
@@ -124,7 +124,7 @@ Champions = {
 		["Caitlyn"] = {charName = "Caitlyn", skillshots = {
 			["CaitlynPiltoverPeacemaker"] = {name = "Piltover Peacemaker", spellName = "CaitlynPiltoverPeacemaker", castDelay = 625, projectileName = "caitlyn_Q_mis.troy", projectileSpeed = 2200, range = 1300, radius = 90, type = "line", unBlockable = false, blockable = true, danger = 0},
 			["CaitlynEntrapment"] = {name = "Caitlyn Entrapment", spellName = "CaitlynEntrapment", castDelay = 150, projectileName = "caitlyn_entrapment_mis.troy", projectileSpeed = 2000, range = 950, radius = 80, type = "line", unBlockable = false, blockable = true, danger = 1},
-			["CaitlynHeadshotMissile"] = {name = "Ace in the Hole", spellName = "CaitlynHeadshotMissile", range = 3000, unBlockable = true, blockable = true, danger = 1, projectileName = "caitlyn_ult_mis.troy"},
+			["CaitlynAceintheHole"] = {name = "Ace in the Hole", spellName = "CaitlynAceintheHole", range = 3000, unBlockable = false, blockable = true, danger = 1, projectileName = "caitlyn_ult_mis.troy"},
 	}},
 		["DrMundo"] = {charName = "DrMundo", skillshots = {
 			["InfectedCleaverMissile"] = {name = "Infected Cleaver", spellName = "InfectedCleaverMissile", castDelay = 250, projectileName = "dr_mundo_infected_cleaver_mis.troy", projectileSpeed = 2000, range = 1050, radius = 75, type = "line", unBlockable = false, blockable = true, danger = 1},
@@ -150,7 +150,7 @@ Champions = {
 			["SivirQ"] = {name = "Boomerang Blade", spellName = "SivirQ", castDelay = 250, projectileName = "Sivir_Base_Q_mis.troy", projectileSpeed = 1350, range = 1175, radius = 101, type = "line", unBlockable = false, blockable = true, danger = 0},
 	}},
 		["Ashe"] = {charName = "Ashe", skillshots = {
-			["EnchantedCrystalArrow"] = {name = "Enchanted Arrow", spellName = "EnchantedCrystalArrow", castDelay = 250, projectileName = "EnchantedCrystalArrow_mis.troy", projectileSpeed = 1600, range = 25000, radius = 130, type = "line", unBlockable = true, blockable = true, danger = 1},
+			["EnchantedCrystalArrow"] = {name = "Enchanted Arrow", spellName = "EnchantedCrystalArrow", castDelay = 250, projectileName = "EnchantedCrystalArrow_mis.troy", projectileSpeed = 1600, range = 25000, radius = 130, type = "line", unBlockable = false, blockable = true, danger = 1},
 			["Volley"] = {name = "Volley", spellName = "Volley", range = 1200, unBlockable = false, blockable = true, danger = 1},
 	}},
 		["KogMaw"] = {charName = "KogMaw", skillshots = {
@@ -273,7 +273,7 @@ Champions = {
 			["ZiggsQ"] = {name = "ZiggsQ", spellName = "ZiggsQ", castDelay = 1500, projectileName = "ZiggsQ.troy", projectileSpeed = math.huge, range = 1500, radius = 100, type = "line", unBlockable = false, blockable = true, danger = 0},
 			["ZiggsW"] = {name = "ZiggsW", spellName = "ZiggsW", castDelay = 250, projectileName = "ZiggsW_mis.troy", projectileSpeed = math.huge, range = 1500, radius = 100, type = "line", unBlockable = false, blockable = true, danger = 0},
 			["ZiggsE"] = {name = "ZiggsE", spellName = "ZiggsE", castDelay = 250, projectileName = "ZiggsEMine.troy", projectileSpeed = math.huge, range = 1500, radius = 100, type = "line", unBlockable = false, blockable = true, danger = 0},
-			["ZiggsR"] = {name = "ZiggsR", spellName = "ZiggsR", projectileName = "ZiggsR_Mis_Nuke.troy", range = 1500, unBlockable = true, blockable = true, danger = 0}
+			["ZiggsR"] = {name = "ZiggsR", spellName = "ZiggsR", projectileName = "ZiggsR_Mis_Nuke.troy", range = 1500, unBlockable = true, blockable = false, danger = 0}
 	}},
 		["Galio"] = {charName = "Galio", skillshots = {
 			["GalioResoluteSmite"] = {name = "GalioResoluteSmite", spellName = "GalioResoluteSmite", castDelay = 250, projectileName = "galio_concussiveBlast_mis.troy", projectileSpeed = 850, range = 2000, radius = 200, type = "circular", unBlockable = false, blockable = true, danger = 1},
@@ -530,7 +530,7 @@ function OnProcessSpell(object, spellProc)
 				end
 			end
 		end 
-	end
+end
 
 function unBlockableSpells()
 	if unBlockableSpell.spellName == "KatarinaR" and unBlockableObject.charName == "Katarina" then
@@ -542,15 +542,15 @@ function unBlockableSpells()
 				CastSpell(_E, object.x, object.z)
 			end
 		end
-	elseif unBlockableParticle ~= nil and GetDistance(unBlockableParticle) < eRange and (unBlockableSpell.spellName == "EzrealTrueshotBarrage" or unBlockableSpell.spellName == "EnchantedCrystalArrow" or unBlockableSpell.spellName == "ZiggsR" or unBlockableSpell.spellName == "CaitlynHeadshotMissile") then
+	elseif unBlockableParticle ~= nil and GetDistance(unBlockableParticle) < eRange and (unBlockableSpell.spellName ==  "ZiggsR") then
 		if EREADY and braumCFG.autoE[unBlockableSpell.spellName] and unBlockableParticle.x > 0 and unBlockableParticle.z > 0 then
 			unBlockableSpell = nil
 			unBlockableObject = nil
 			object = unBlockableParticle
-			PrintChat("unBlockableParticle: "..unBlockableParticle.x.."/"..unBlockableParticle.z.." myHero: "..myHero.x.."/"..myHero.z)
+			--PrintChat("unBlockableParticle: "..unBlockableParticle.x.."/"..unBlockableParticle.z.." myHero: "..myHero.x.."/"..myHero.z)
 			unBlockableParticle = nil
 			CastSpell(_E, object.x, object.z)
-		end
+		end 
 	end
 end
 function Combo()
