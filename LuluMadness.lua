@@ -5,13 +5,14 @@ if myHero.charName ~= "Lulu" then return end
 require 'VPrediction'
 require 'SxOrbwalk'
 
-local currentVersion = 1
+local currentVersion = 1.1
 
 local qDelay, qWidth, qRange, qSpeed = 0.2, 50, 900, 1600
+local qRange2 = 850
+local qExtended = 1800
 local eRange, eDelay = 650, 0.2
 local wRange, wDelay = 650, 0.2
 local rRange, rDelay, rRadius = 900, 0.2, 200
-local qExtended = 1550
 local Color = ARGB(255,0,255,0)
  local stunList = {
 ["ahriseducedoom"] = true,
@@ -133,8 +134,8 @@ function OnLoad()
 	PrintChat("<font color=\"#33CC99\"><b>LuluMadness by Kqmii </b></font>"..currentVersion.."<font color=\"#33CC99\"><b> Loaded</b></font>")
 	PrintChat("<b>Report any problem by pm to kqmii on bol</b>")
 
-	minionAlly = minionManager(MINION_ALLY, 925, ally, MINION_SORT_HEALTH_ASC)
-	minionEnemy = minionManager(MINION_ENEMY, 1100, myHero, MINION_SORT_HEALTH_ASC)
+	minionAlly = minionManager(MINION_ALLY, 925, myHero, MINION_SORT_HEALTH_DEC)
+	minionEnemy = minionManager(MINION_ENEMY, 1100, myHero, MINION_SORT_HEALTH_DEC)
 	Menu()
 	updateScript()
 	if heroManager.iCount == 10 then
@@ -164,7 +165,7 @@ function OnTick()
 		autoE()
 	end
 	if luluCFG.harass.qeHarass then
-			UseQ()
+		ExtendedQ()
 	end
 	if luluCFG.combo.rConfig.autoUlt then
 		autoR()
@@ -224,7 +225,7 @@ end
 --			  Functions				 --
 ---------------------------------------
 function Menu()
-	ts = TargetSelector(TARGET_LESS_CAST, 1000)
+	ts = TargetSelector(TARGET_LESS_CAST, 2000)
 	VP = VPrediction()
 	SxOrb = SxOrbWalk(VP)
 	luluCFG = scriptConfig("LuluMadness", "LKQ")
@@ -236,7 +237,6 @@ function Menu()
 				luluCFG.combo.wConfig:addParam("wUse", "W in combo", SCRIPT_PARAM_ONKEYTOGGLE, false, GetKey("W"))
 				luluCFG.combo.wConfig:addParam("autoW", "Auto W CC'ed Champ", SCRIPT_PARAM_ONOFF, true) 
 			luluCFG.combo:addSubMenu("E Spell config", "eConfig")
-				luluCFG.combo.eConfig:addParam("eUse", "Use E in combo", SCRIPT_PARAM_ONOFF, true)
 				luluCFG.combo.eConfig:addParam("qExtendedE", "Q-E Combo", SCRIPT_PARAM_ONOFF, true)
 				luluCFG.combo.eConfig:addParam("autoE", "Auto E low hp", SCRIPT_PARAM_ONOFF, false)
 				luluCFG.combo.eConfig:addParam("hpPercent", "% hp for auto E", SCRIPT_PARAM_SLICE, 20, 0, 100, 0)
@@ -251,7 +251,6 @@ function Menu()
 			luluCFG.combo:addParam("comboKey", "Combo key", SCRIPT_PARAM_ONKEYDOWN, false, string.byte(" "))
 		
 			luluCFG:addSubMenu("--["..myHero.charName.."]-- Harass", "harass")
-				luluCFG.harass:addParam("qHarass", "Harass with Q", SCRIPT_PARAM_ONOFF, false)
 				luluCFG.harass:addParam("qeHarass", "Harass with Q-E", SCRIPT_PARAM_ONKEYTOGGLE, false, GetKey("T"))
 				
 			luluCFG:addSubMenu("--["..myHero.charName.."]-- Drawings", "draw")
@@ -273,8 +272,11 @@ function Menu()
 			luluCFG.harass:permaShow("qeHarass")
 end
 function Combo()
-	if luluCFG.combo.qConfig.qUse or luluCFG.combo.eConfig.qExtendedE then
+	if luluCFG.combo.qConfig.qUse then
 		UseQ()
+	end
+	if luluCFG.combo.eConfig.qExtendedE then
+		ExtendedQ()
 	end
 	if luluCFG.combo.eConfig.eUse then	
 		UseEcombo()
@@ -347,7 +349,7 @@ end
 ---------------------------------------
 function UseQ()
 	for i, target in pairs (GetEnemyHeroes()) do
-		if luluCFG.combo.qConfig.qUse or luluCFG.harass.qHarass then
+		if luluCFG.combo.qConfig.qUse then
 			if not target.dead and QREADY and ValidTarget(target) then
 				local CastPosition, HitChance, Position = VP:GetLineCastPosition(target, qDelay, qWidth, qRange, qSpeed, myHero, false)
 				if CastPosition and HitChance >= 2 and GetDistance(target, myHero) < qRange then
@@ -355,46 +357,56 @@ function UseQ()
 				end
 			end
 		end
-		if luluCFG.combo.eConfig.qExtendedE or luluCFG.harass.qeHarass then
-			if not target.dead and EREADY and QREADY and ValidTarget(target) then
-				local CastPosition, HitChance, Position = VP:GetLineCastPosition(target, qDelay, qWidth, qExtended, qSpeed, myHero, false)
-					if CastPosition and HitChance >= 2 and GetDistance(target, myHero) > 200 then
-						UseE()
-						CastSpell(_Q, CastPosition.x, CastPosition.z)
-					end
-			end
-		end
 	end
 end
-function UseE()
-	for e, target in pairs(GetEnemyHeroes()) do
-		for m, minion in pairs(minionEnemy.objects) do
-			if not minion.dead then
-				if GetDistance(minion, myHero) < eRange and GetDistance(target, minion) < 600 and GetDistance(target, myHero) > eRange and EREADY then
-					CastSpell(_E, minion)
+function ExtendedQ()
+	if not QREADY then return end
+		
+	for t, target in pairs(GetEnemyHeroes()) do
+		if ValidTarget(target) and not target.dead then
+			if GetDistance(target) > qRange then
+				for m, minion in pairs(minionEnemy.objects) do
+					if ValidTarget(minion) and not minion.dead then
+						if GetDistance(minion) < eRange and GetDistance(minion, target) < qRange2 then
+							local CastPosition, HitChance, Position = VP:GetLineCastPosition(target, qDelay, qWidth, qExtended, qSpeed, myHero, false)
+							if CastPosition ~= nil and HitChance >= 2 then
+								CastSpell(_E, minion)
+								CastSpell(_Q, CastPosition.x, CastPosition.z)
+							end
+						end
+					end
+				end
+				for m, minion in pairs(minionAlly.objects) do
+					if not minion.dead then
+						if GetDistance(minion) < eRange and GetDistance(minion, target) < qRange2 then
+							local CastPosition, HitChance, Position = VP:GetLineCastPosition(target, qDelay, qWidth, qExtended, qSpeed, myHero, false)
+							if CastPosition ~= nil and HitChance >= 2 then
+								CastSpell(_E, minion)
+								CastSpell(_Q, CastPosition.x, CastPosition.z)
+							end
+						end
+					end
+				end
+				for a, ally in pairs(GetAllyHeroes()) do
+					if ValidTarget(ally) and not ally.dead then
+						if GetDistance(ally) < eRange and GetDistance(ally, target) < qRange2 then
+							local CastPosition, HitChance, Position = VP:GetLineCastPosition(target, qDelay, qWidth, qExtended, qSpeed, myHero, false)
+							if CastPosition ~= nil and HitChance >= 2 then
+								CastSpell(_E, ally)
+								CastSpell(_Q, CastPosition.x, CastPosition.z)
+							end
+						end
+					end
+				end
+				if ValidTarget(target) and not target.dead then
+					if GetDistance(target) < eRange then
+							CastSpell(_E, target)
+						end	
+					end
 				end
 			end
 		end
-		for i, minions in ipairs(minionAlly.objects) do
-			if not minions.dead then
-				if GetDistance(minions, myHero) < eRange and GetDistance(target, minions) < 600 and GetDistance(target, myHero) > eRange and EREADY then
-					CastSpell(_E, minions)
-				end
-			end
-		end
-		for a, ally in pairs(GetAllyHeroes()) do
-			if not ally.dead then
-				if GetDistance(ally, myHero) < eRange and GetDistance(target, ally) < 600 and GetDistance(target, myHero) > eRange and EREADY then
-					CastSpell(_E, ally)
-				end
-			end
-		end
-		if not target.dead then
-			if GetDistance(target, myHero) < eRange and EREADY and ValidTarget(target) then
-				CastSpell(_E, target)
-			end
-		end
-	end
+	
 end
 function UseEcombo()
 	for e, target in pairs(GetEnemyHeroes()) do
