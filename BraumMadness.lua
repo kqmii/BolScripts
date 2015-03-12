@@ -3,7 +3,7 @@
 ------------------------------
 if myHero.charName ~= "Braum" then return end
 
-local currentVersion = 1.4
+local currentVersion = 1.5
 
 require 'VPrediction'
 require 'SxOrbwalk'
@@ -83,9 +83,6 @@ Champions = {
 	}},
 		["Karthus"] = {charName = "Karthus", skillshots = {
 			["LayWaste"] = {name = "Lay Waste", spellName = "LayWaste", castDelay = 250, projectileName = "LayWaste_point.troy", projectileSpeed = 1750, range = 875, radius = 140, type = "circular", blockable = false, danger = 0}
-	}},
-		["Chogath"] = {charName = "Chogath", skillshots = {
-			["Rupture"] = {name = "Rupture", spellName = "Rupture", castDelay = 0, projectileName = "rupture_cas_01_red_team.troy", projectileSpeed = 950, range = 950, radius = 250, type = "circular", blockable = false, danger = 1}
 	}},
 		["Blitzcrank"] = {charName = "Blitzcrank", skillshots = {
 			["RocketGrabMissile"] = {name = "Rocket Grab", spellName = "RocketGrabMissile", castDelay = 250, projectileName = "FistGrab_mis.troy", projectileSpeed = 1800, range = 1050, radius = 70, type = "line", unBlockable = false, blockable = true, danger = 1}
@@ -276,7 +273,8 @@ Champions = {
 			["ZiggsR"] = {name = "ZiggsR", spellName = "ZiggsR", projectileName = "ZiggsR_Mis_Nuke.troy", range = 1500, unBlockable = true, blockable = false, danger = 0}
 	}},
 		["Galio"] = {charName = "Galio", skillshots = {
-			["GalioResoluteSmite"] = {name = "GalioResoluteSmite", spellName = "GalioResoluteSmite", castDelay = 250, projectileName = "galio_concussiveBlast_mis.troy", projectileSpeed = 850, range = 2000, radius = 200, type = "circular", unBlockable = false, blockable = true, danger = 1},
+			["GalioResoluteSmite"] = {name = "Resolute smite", spellName = "GalioResoluteSmite", castDelay = 250, projectileName = "galio_concussiveBlast_mis.troy", projectileSpeed = 850, range = 2000, radius = 200, type = "circular", unBlockable = false, blockable = true, danger = 1},
+			["GalioRighteousGust"] = {name = "Righteous gust", spellName = "GalioRighteousGust", castDelay = 0.5, projectileName = "galio_windTunnel_mis_02.troy", projectileSpeed = 1200, range = 1180, radius = 140, type = "line", unBlockable = false, blockable = true, danger = 1}
 	}},
 		["Yasuo"] = {charName = "Yasuo", skillshots = {
 			["yasuoq3w"] = {name = "Steel Tempest", spellName = "yasuoq3w", castDelay = 300, projectileName = "Yasuo_Q_wind_mis.troy", projectileSpeed = 1200, range = 900, radius = 375, type = "line", unBlockable = false, blockable = true, danger = 1},
@@ -463,6 +461,7 @@ function Menu()
 			braumCFG.harass:addParam("manaHarass", "Stop harass below % mana", SCRIPT_PARAM_SLICE, 40, 0, 100, 0)
 		
 		braumCFG:addParam("wSaveAlly", "W-E ally if incoming Skillshot", SCRIPT_PARAM_ONOFF, true)
+		braumCFG:addParam("weHpPercent", "% Hp left for W-E ally", SCRIPT_PARAM_SLICE, 20, 0, 100, 0)
 		braumCFG:addParam("autoE", "Auto E incoming skillshot/ults", SCRIPT_PARAM_ONOFF, true)
 		braumCFG:addSubMenu("--["..myHero.charName.."]-- Auto E spells", "eSpells")
 		for i, hero in pairs(GetEnemyHeroes()) do
@@ -513,7 +512,7 @@ function OnProcessSpell(object, spellProc)
 									if spellProc.endPos.x ~= myHero.x+20 and spellProc.endPos.z ~= myHero.z+20 and braumCFG.autoE then
 										CastSpell(_E, object.x, object.z)
 									end
-									if spellProc.endPos.x ~= ally.x+20 and spellProc.endPos.z ~= ally.z+20 and GetDistance(ally, myHero) < wRange and braumCFG.wSaveAlly and WREADY then
+									if spellProc.endPos.x ~= ally.x+20 and spellProc.endPos.z ~= ally.z+20 and GetDistance(ally, myHero) < wRange and braumCFG.wSaveAlly and WREADY and HpCheck(ally, braumCFG.weHpPercent) then
 										CastSpell(_W, ally)
 										CastSpell(_E, object.x, object.z)
 									end
