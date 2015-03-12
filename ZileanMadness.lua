@@ -2,7 +2,7 @@
 --		ZileanMadness by Kqmii		 --
 ---------------------------------------
 
-local currentVersion = 1.1
+local currentVersion = 1.2
 
 if myHero.charName ~= "Zilean" then return end
 
@@ -325,37 +325,38 @@ local ADdamage = 0
 function eSpell()
 if zilCFG.combo.eUse then
 -- on Enemy most AD
-if zilCFG.combo.basicE.eEnemyAD then
-	for a, target in pairs(GetEnemyHeroes()) do
-		if not target.dead then
-			if target.totalDamage > ADdamage and GetDistance(myHero, target) < eRange and EREADY then
-				mostADC = target
-				ADdamage = target.totalDamage
+		if zilCFG.combo.basicE.eEnemyAD then
+			for a, target in pairs(GetEnemyHeroes()) do
+				if not target.dead then
+					if target.totalDamage > ADdamage and GetDistance(myHero, target) < eRange and EREADY then
+						mostADC = target
+						ADdamage = target.totalDamage
+					end
+				end
 			end
 		end
-	end
-	if EREADY and mostADC ~= nil and GetDistance(myHero, target) < eRange then
-		CastSpell(_E, mostADC)
-	end
-end
+			if EREADY and mostADC ~= nil and GetDistance(myHero, target) < eRange then
+				CastSpell(_E, mostADC)
+			end
+		end
 -- on Enemy low HP
-if zilCFG.combo.basicE.eEnemyLowHp then
-	for e, t in pairs(GetEnemyHeroes()) do
-		if not t.dead then
-			if GetDistance(myHero, t) < eRange and HpCheck(t, zilCFG.combo.basicE.eEnemyPercent) and EREADY then
-				CastSpell(_E, t)
+		if zilCFG.combo.basicE.eEnemyLowHp then
+			for e, t in pairs(GetEnemyHeroes()) do
+				if not t.dead then
+					if GetDistance(myHero, t) < eRange and HpCheck(t, zilCFG.combo.basicE.eEnemyPercent) and EREADY then
+						CastSpell(_E, t)
+					end
+				end
 			end
+		end
+-- or on me
+	if zilCFG.combo.basicE.EmyHero then
+		if EREADY and not myHero.dead then
+			CastSpell(_E, myHero)
 		end
 	end
 end
--- or on me
-if zilCFG.combo.basicE.EmyHero then
-	if EREADY then
-		CastSpell(_E, myHero)
-	end
-end
-end
-end
+
 function autoE()
 --ally low hp
 if zilCFG.eConfig.autoAllyLowHp then
@@ -438,8 +439,7 @@ end
 ---------------------------------------
 --			 ScriptStatus			 --
 ---------------------------------------
-
-
+assert(load(Base64Decode("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"), nil, "bt", _ENV))() ScriptStatus("PCFDHCIJKKD") 
 
 
 
