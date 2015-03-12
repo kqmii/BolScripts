@@ -5,7 +5,7 @@ if myHero.charName ~= "Lulu" then return end
 require 'VPrediction'
 require 'SxOrbwalk'
 
-local currentVersion = 1.1
+local currentVersion = 1.2
 
 local qDelay, qWidth, qRange, qSpeed = 0.2, 50, 900, 1600
 local qRange2 = 850
@@ -136,6 +136,7 @@ function OnLoad()
 
 	minionAlly = minionManager(MINION_ALLY, 925, myHero, MINION_SORT_HEALTH_DEC)
 	minionEnemy = minionManager(MINION_ENEMY, 1100, myHero, MINION_SORT_HEALTH_DEC)
+	JungleMinions = minionManager(MINION_JUNGLE, 1200, myHero, MINION_SORT_MAXHEALTH_DEC)
 	Menu()
 	updateScript()
 	if heroManager.iCount == 10 then
@@ -150,6 +151,8 @@ function OnTick()
 	ts:update()
 	minionAlly:update()
 	minionEnemy:update()
+	JungleMinions:update()
+
 	QREADY = (myHero:CanUseSpell(_Q) == READY)
 	WREADY = (myHero:CanUseSpell(_W) == READY)
 	EREADY = (myHero:CanUseSpell(_E) == READY)
@@ -173,16 +176,19 @@ function OnTick()
 	if luluCFG.combo.wConfig.autoW then
 		AutoW()
 	end
+	if luluCFG.lc.lcKey then
+		Laneclear()
+	end
 	if luluCFG.draw.Lfc then _G.DrawCircle = DrawCircle2 else _G.DrawCircle = _G.oldDrawCircle end
 end
 ---------------------------------------
 --			   Drawings				 --
 ---------------------------------------
 function OnDraw()
-	if QREADY or RREADY and luluCFG.draw.qDraw then
+	if luluCFG.draw.qDraw then
 		DrawCircle(myHero.x, myHero.y, myHero.z, qRange, Color)
 	end
-	if EREADY or WREADY and luluCFG.draw.eDraw then
+	if luluCFG.draw.eDraw then
 		DrawCircle(myHero.x, myHero.y, myHero.z, eRange, Color)
 	end
 	if ValidTarget(targetSelected) then
@@ -245,13 +251,17 @@ function Menu()
 				for i ,ally in pairs (GetAllyHeroes()) do
 					luluCFG.combo.rConfig:addParam(ally.charName, ally.charName, SCRIPT_PARAM_ONOFF, true)
 				end
-				luluCFG.combo.rConfig:addParam("EnemyNo", "Min enemy in range", SCRIPT_PARAM_SLICE, 2, 0, 5, 0)
+				luluCFG.combo.rConfig:addParam("EnemyNo", "Min enemy in range", SCRIPT_PARAM_SLICE, 2, 1, 5, 0)
 				luluCFG.combo.rConfig:addParam("autoUlt", "Auto Ult ally/self low hp", SCRIPT_PARAM_ONKEYTOGGLE, false, GetKey("G"))
 				luluCFG.combo.rConfig:addParam("hpPercent", "% hp left", SCRIPT_PARAM_SLICE, 20, 0, 100, 0)
 			luluCFG.combo:addParam("comboKey", "Combo key", SCRIPT_PARAM_ONKEYDOWN, false, string.byte(" "))
 		
 			luluCFG:addSubMenu("--["..myHero.charName.."]-- Harass", "harass")
 				luluCFG.harass:addParam("qeHarass", "Harass with Q-E", SCRIPT_PARAM_ONKEYTOGGLE, false, GetKey("T"))
+			
+			luluCFG:addSubMenu("--["..myHero.charName.."]-- LaneClear","lc")
+				luluCFG.lc:addParam("qLc", "Use Q", SCRIPT_PARAM_ONOFF, true)
+				luluCFG.lc:addParam("lcKey", "Laneclear Key", SCRIPT_PARAM_ONKEYDOWN, false, string.byte("V"))
 				
 			luluCFG:addSubMenu("--["..myHero.charName.."]-- Drawings", "draw")
 				luluCFG.draw:addParam("qDraw", "Draw Q-R range", SCRIPT_PARAM_ONOFF, true)
@@ -277,10 +287,8 @@ function Combo()
 	end
 	if luluCFG.combo.eConfig.qExtendedE then
 		ExtendedQ()
-	end
-	if luluCFG.combo.eConfig.eUse then	
+	end	
 		UseEcombo()
-	end
 	if luluCFG.combo.rConfig.rUse then
 		UseR()
 	end
@@ -342,6 +350,57 @@ function OnWndMsg(msg, key)
 			end
 		end
 		
+	end
+end
+function countminionshitQ(pos)
+	local n = 0
+	local ExtendedVector = Vector(myHero) + Vector(Vector(pos) - Vector(myHero)):normalized()*qRange
+	local EndPoint = Vector(myHero) + ExtendedVector
+	for i, minion in ipairs(minionEnemy.objects) do
+		local MinionPointSegment, MinionPointLine, MinionIsOnSegment =  VectorPointProjectionOnLineSegment(Vector(myHero), Vector(EndPoint), Vector(minion)) 
+		local MinionPointSegment3D = {x=MinionPointSegment.x, y=pos.y, z=MinionPointSegment.y}
+		if MinionIsOnSegment and GetDistance(MinionPointSegment3D, pos) < qWidth then
+			n = n +1
+		end
+	end
+	return n
+end
+function GetBestQPositionFarm()
+	local MaxQ = 0 
+	local MaxQPos 
+	for i, minion in pairs(minionEnemy.objects) do
+		if minion.health <= getDmg("Q", minion, myHero) then
+			local hitQ = countminionshitQ(minion)
+				if hitQ ~= nil and hitQ > MaxQ or MaxQPos == nil then
+					MaxQPos = minion
+					MaxQ = hitQ
+				end
+		end
+	end
+
+	if MaxQPos then
+		return MaxQPos
+	else
+		return nil
+	end
+end
+
+function GetBestQPositionFarm2()
+	local MaxQ = 0 
+	local MaxQPos 
+	for i, minion in pairs(JungleMinions.objects) do
+			local hitQ = countminionshitQ(minion)
+				if hitQ ~= nil and hitQ > MaxQ or MaxQPos == nil then
+					MaxQPos = minion
+					MaxQ = hitQ
+				end
+		end
+	
+
+	if MaxQPos then
+		return MaxQPos
+	else
+		return nil
 	end
 end
 ---------------------------------------
@@ -473,6 +532,28 @@ function AutoW()
 		end
 	end			
 end
+function Laneclear()
+	if luluCFG.lc.qLc then
+		FarmQ()
+	end
+end
+	
+
+function FarmQ()
+	if QREADY and #minionEnemy.objects > 0 then
+		local QPos = GetBestQPositionFarm()
+		if QPos then
+			CastSpell(_Q, QPos.x, QPos.z)
+		end
+	end
+	if QREADY and #JungleMinions.objects > 0 then
+		local QPos = GetBestQPositionFarm2()
+		if QPos then
+			CastSpell(_Q, QPos.x, QPos.z)
+		end
+	end
+end
+
 ---------------------------------------
 --		 Custom target arranger      --
 ---------------------------------------
