@@ -17,7 +17,6 @@ local namiAA = 675
 local Color1, Color2, Color3, Color4 = ARGB(255, 0, 0, 255), ARGB(255, 0, 51, 255), ARGB(255, 0, 122, 255), ARGB(255, 0, 255, 0)
 local gEnemy = GetEnemyHeroes()
 local gAlly = GetAllyHeroes()
-local bounce = 500
 local EnemyADdamage = 0
 local AllyADdamage = 0
 local stunList = {
