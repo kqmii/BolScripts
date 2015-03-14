@@ -3,7 +3,7 @@
 ----------------------------
 if myHero.charName ~= "Nami" then return end
 
-local currentVersion = 1.41
+local currentVersion = 1.5
 
 require 'VPrediction'
 require 'SxOrbwalk'
