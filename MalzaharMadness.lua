@@ -4,7 +4,7 @@
 
 if myHero.charName ~= "Malzahar" then return end
 
-local currentVersion = 1
+local currentVersion = 1.1
 
 require 'VPrediction'
 require 'SxOrbwalk'
