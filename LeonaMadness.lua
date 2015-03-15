@@ -7,18 +7,20 @@
 --*******************************--
 if myHero.charName ~= "Leona" then return end
 
-local currentVersion = 1.2
+local currentVersion = 1.3
 
 require 'VPrediction'
 require 'SxOrbwalk'
 local ts
 local qReady = false
 local wRange = 450
-local eDelay, eWidth, eRange, eSpeed = 0.2, 40, 875, 2000
+local eDelay, eWidth, eSpeed = 0.2, 40, 2000
 local rDelay, rRadius, rRange, rSpeed = 0.625, 220, 1200, math.huge
 local wColor, eColor, rColor = ARGB(255, 204, 153, 0), ARGB(255, 204, 102, 0), ARGB(255, 204, 51, 0)
 local targetSelected = nil
 local tRange = 900
+local Wards = {}
+local leonaRange = 125
 ---------------------------------------
 --			   Updater				 --
 ---------------------------------------
@@ -94,7 +96,6 @@ function OnLoad()
 	PrintChat("<b>Report any problem by pm to kqmii on bol</b>")
 	Menu()
 	updateScript()
-	
 			if not FileExist(LIB_PATH.."VPrediction.lua") then
 			LuaSocket = require("socket")
 			ScriptSocket = LuaSocket.connect("sx-bol.eu", 80)
@@ -139,7 +140,9 @@ function OnTick()
 		ultiEngage()
 		MoveToMouse()
 	end
-	
+	if leoCFG.wDestroy then
+		wardDestroy()
+	end
 	if leoCFG.draw.Lfc then _G.DrawCircle = DrawCircle2 else _G.DrawCircle = _G.oldDrawCircle end
 end
 ---------------------------------------
@@ -158,8 +161,45 @@ function OnDraw()
 		if leoCFG.draw.wDraw and WREADY then
 			DrawCircle(myHero.x, myHero.y, myHero.z, wRange, wColor)
 		end
-		if leoCFG.draw.eDraw and EREADY then
-			DrawCircle(myHero.x, myHero.y, myHero.z, eRange, eColor)
+		if leoCFG.eMaxRange == 1 then
+			if leoCFG.draw.eDraw and EREADY then
+				DrawCircle(myHero.x, myHero.y, myHero.z, 875, eColor)
+			end
+		end
+		if leoCFG.eMaxRange == 2 then
+			if leoCFG.draw.eDraw and EREADY then
+				DrawCircle(myHero.x, myHero.y, myHero.z, 865, eColor)
+			end
+		end
+		if leoCFG.eMaxRange == 3 then
+			if leoCFG.draw.eDraw and EREADY then
+				DrawCircle(myHero.x, myHero.y, myHero.z, 855, eColor)
+			end
+		end
+		if leoCFG.eMaxRange == 4 then
+			if leoCFG.draw.eDraw and EREADY then
+				DrawCircle(myHero.x, myHero.y, myHero.z, 845, eColor)
+			end
+		end
+		if leoCFG.eMaxRange == 5 then
+			if leoCFG.draw.eDraw and EREADY then
+				DrawCircle(myHero.x, myHero.y, myHero.z, 835, eColor)
+			end
+		end
+		if leoCFG.eMaxRange == 6 then
+			if leoCFG.draw.eDraw and EREADY then
+				DrawCircle(myHero.x, myHero.y, myHero.z, 825, eColor)
+			end
+		end
+		if leoCFG.eMaxRange == 7 then
+			if leoCFG.draw.eDraw and EREADY then
+				DrawCircle(myHero.x, myHero.y, myHero.z, 815, eColor)
+			end
+		end
+		if leoCFG.eMaxRange == 8 then
+			if leoCFG.draw.eDraw and EREADY then
+				DrawCircle(myHero.x, myHero.y, myHero.z, 800, eColor)
+			end
 		end
 		if leoCFG.draw.rDraw and RREADY then
 			DrawCircle(myHero.x, myHero.y, myHero.z, rRange, rColor)
@@ -218,6 +258,10 @@ function Menu()
 				leoCFG.Combo.uConfig:addParam("mnRange", "Mini Range to ultimate", SCRIPT_PARAM_SLICE, 600, 0, 1200, 0)
 				leoCFG.Combo.uConfig:addParam("noEnemy", "Mini enemies to ultimate on", SCRIPT_PARAM_SLICE, 1, 1, 5, 0)
 			leoCFG.Combo:addParam("comboKey", "Combo key", SCRIPT_PARAM_ONKEYDOWN, false, string.byte(" "))
+			
+		leoCFG:addParam("eMaxRange", "Change E Max range", SCRIPT_PARAM_LIST,875, {"875","865","855","845","835","825","815","800"})
+		
+		leoCFG:addParam("wDestroy", "Auto AA-Q-AA-AA Wards", SCRIPT_PARAM_ONKEYTOGGLE, false, GetKey("S"))
 		
 		leoCFG:addParam("uErange", "Minimal range to engage with ult", SCRIPT_PARAM_SLICE, 600, 0, 1200, 0)
 		leoCFG:addParam("uEnumber", "How many enemies to engage ", SCRIPT_PARAM_SLICE, 1, 1, 5, 0)
@@ -255,15 +299,32 @@ function MoveToMouse()
 		myHero:MoveTo(mousePos.x, mousePos.z)
 	end
 end
-
+function OnCreateObj(obj)
+	if obj ~= nil and obj.valid then
+		if obj.name == "SightWard" or obj.name == "VisionWard" or obj.name == "YellowTrinket" then
+			table.insert(Wards, obj)
+		end
+	end
+end
 ---------------------------------------
 --			Spells config            --
 ---------------------------------------
+function wardDestroy()
+local addDelay = ((myHero.attackSpeed)+0.1)
+	for i, ward in pairs(Wards) do
+		if ward.team == TEAM_ENEMY and ward.visible == true and GetDistance(ward, myHero) < leonaRange then
+			myHero:Attack(ward)
+			DelayAction(function() CastSpell(_Q) end, addDelay)
+			myHero:Attack(ward)
+			myHero:Attack(ward)
+		end
+	end
+end
 function useQ()
 	if leoCFG.Combo.qUse then
 		for i, target in pairs(GetEnemyHeroes()) do
 			if not target.dead then
-				if GetDistance(target) <= 200 and QREADY then
+				if GetDistance(target) <= 200 and QREADY and ValidTarget(target) then
 					CastSpell(_Q)
 					myHero:Attack(target)
 				end
@@ -275,7 +336,7 @@ function useW()
 	if leoCFG.Combo.wUse then
 		for i, target in ipairs(GetEnemyHeroes()) do
 			if not target.dead then
-				if GetDistance(target) <= wRange and WREADY then
+				if GetDistance(target) <= wRange and WREADY and ValidTarget(target) then
 					CastSpell(_W)
 				end
 			end
@@ -286,10 +347,75 @@ function useE()
 	if leoCFG.Combo.eUse then
 		for i, target in pairs(GetEnemyHeroes()) do
 			if not target.dead then
-				if target ~= nil and EREADY then
-					local CastPosition, HitChance, Position = VP:GetLineCastPosition(target, eDelay, eWidth, eRange, eSpeed, myHero, false)
-						if CastPosition and HitChance >= 2 and GetDistance(CastPosition) < eRange then
-							CastSpell(_E, CastPosition.x, CastPosition.z)
+				if leoCFG.eMaxRange == 1 then
+					if target ~= nil and EREADY and ValidTarget(target) then
+						local CastPosition, HitChance, Position = VP:GetLineCastPosition(target, eDelay, eWidth, 875, eSpeed, myHero, false)
+							if CastPosition and HitChance >= 2 and GetDistance(CastPosition) < 875 then
+								CastSpell(_E, CastPosition.x, CastPosition.z)
+							end
+						
+					end
+				end
+				if leoCFG.eMaxRange == 2 then
+					if target ~= nil and EREADY and ValidTarget(target) then
+						local CastPosition, HitChance, Position = VP:GetLineCastPosition(target, eDelay, eWidth, 865, eSpeed, myHero, false)
+							if CastPosition and HitChance >= 2 and GetDistance(CastPosition) < 875 then
+								CastSpell(_E, CastPosition.x, CastPosition.z)
+							end
+						
+					end
+				end
+				if leoCFG.eMaxRange == 3 then
+					if target ~= nil and EREADY and ValidTarget(target) then
+						local CastPosition, HitChance, Position = VP:GetLineCastPosition(target, eDelay, eWidth, 855, eSpeed, myHero, false)
+							if CastPosition and HitChance >= 2 and GetDistance(CastPosition) < 875 then
+								CastSpell(_E, CastPosition.x, CastPosition.z)
+							end
+						
+					end
+				end
+				if leoCFG.eMaxRange == 4 then
+					if target ~= nil and EREADY and ValidTarget(target) then
+						local CastPosition, HitChance, Position = VP:GetLineCastPosition(target, eDelay, eWidth, 845, eSpeed, myHero, false)
+							if CastPosition and HitChance >= 2 and GetDistance(CastPosition) < 875 then
+								CastSpell(_E, CastPosition.x, CastPosition.z)
+							end
+						
+					end
+				end
+				if leoCFG.eMaxRange == 5 then
+					if target ~= nil and EREADY and ValidTarget(target) then
+						local CastPosition, HitChance, Position = VP:GetLineCastPosition(target, eDelay, eWidth, 835, eSpeed, myHero, false)
+							if CastPosition and HitChance >= 2 and GetDistance(CastPosition) < 875 then
+								CastSpell(_E, CastPosition.x, CastPosition.z)
+							end
+						
+					end
+				end
+				if leoCFG.eMaxRange == 6 then
+					if target ~= nil and EREADY and ValidTarget(target) then
+						local CastPosition, HitChance, Position = VP:GetLineCastPosition(target, eDelay, eWidth, 825, eSpeed, myHero, false)
+							if CastPosition and HitChance >= 2 and GetDistance(CastPosition) < 875 then
+								CastSpell(_E, CastPosition.x, CastPosition.z)
+							end
+						
+					end
+				end
+				if leoCFG.eMaxRange == 7 then
+					if target ~= nil and EREADY and ValidTarget(target) then
+						local CastPosition, HitChance, Position = VP:GetLineCastPosition(target, eDelay, eWidth, 815, eSpeed, myHero, false)
+							if CastPosition and HitChance >= 2 and GetDistance(CastPosition) < 875 then
+								CastSpell(_E, CastPosition.x, CastPosition.z)
+							end
+						
+					end
+				end
+				if leoCFG.eMaxRange == 8 then
+					if target ~= nil and EREADY and ValidTarget(target) then
+						local CastPosition, HitChance, Position = VP:GetLineCastPosition(target, eDelay, eWidth, 800, eSpeed, myHero, false)
+							if CastPosition and HitChance >= 2 and GetDistance(CastPosition) < 875 then
+								CastSpell(_E, CastPosition.x, CastPosition.z)
+							end
 						end
 					end
 				end
@@ -299,9 +425,9 @@ end
 function ulti()
 	if leoCFG.Combo.rUse then
 		for i, target in pairs(GetEnemyHeroes()) do
-			if not target.dead then 
+			if not target.dead then
 				local AOECastPosition, MainTargetHitChance, nTargets = VP:GetCircularAOECastPosition(target, rDelay, rRadius, leoCFG.Combo.uConfig.mnRange, rSpeed, myHero)
-					if MainTargetHitChance >= 2 and GetDistance(AOECastPosition) < leoCFG.Combo.uConfig.mnRange and nTargets >= leoCFG.Combo.uConfig.noEnemy and RREADY then
+					if MainTargetHitChance >= 2 and GetDistance(AOECastPosition) < leoCFG.Combo.uConfig.mnRange and nTargets >= leoCFG.Combo.uConfig.noEnemy and RREADY and ValidTarget(target) then
 						CastSpell(_R, AOECastPosition.x, AOECastPosition.z)
 					end
 			end
@@ -312,7 +438,7 @@ function ultiEngage()
 	for i, target in pairs(GetEnemyHeroes()) do
 		if not target.dead then
 			local AOECastPosition, MainTargetHitChance, nTargets = VP:GetCircularAOECastPosition(target, rDelay, rRadius, leoCFG.uErange, rSpeed, myHero)
-				if MainTargetHitChance >= 2 and GetDistance(AOECastPosition) < leoCFG.uErange and nTargets >= leoCFG.uEnumber and RREADY then
+				if MainTargetHitChance >= 2 and GetDistance(AOECastPosition) < leoCFG.uErange and nTargets >= leoCFG.uEnumber and RREADY and ValidTarget(target) then
 					CastSpell(_R, AOECastPosition.x, AOECastPosition.z)
 				end
 			
