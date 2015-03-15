@@ -98,6 +98,11 @@ function OnDraw()
 		if malzCFG.draw.rDraw and RREADY then
 			DrawCircle(myHero.x, myHero.y, myHero.z, rRange, Color)
 		end
+		if ValidTarget(ts.target) then
+			DrawCircle(ts.target.x, ts.target.y, ts.target.z, 120, ARGB(255, 102, 204, 51))
+			DrawCircle(ts.target.x, ts.target.y, ts.target.z, 125, ARGB(255, 102, 204, 51))
+			DrawCircle(ts.target.x, ts.target.y, ts.target.z, 130, ARGB(255, 102, 204, 51))
+		end
 end
 function DrawCircleNextLvl(x, y, z, radius, width, color, chordlength)
   radius = radius or 300
