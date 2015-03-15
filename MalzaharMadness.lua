@@ -40,6 +40,7 @@ function OnLoad()
 	EnemyMinions = minionManager(MINION_ENEMY, 1000, myHero, MINION_SORT_HEALTH_ASC)
 	JungleMinions = minionManager(MINION_JUNGLE, 1000, myHero, MINION_SORT_MAXHEALTH_ASC)
 	Menu()
+	updateScript()
 	if heroManager.iCount == 10 then
 		arrangeTarget()
 	else
