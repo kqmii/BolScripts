@@ -4,7 +4,7 @@
 
 if myHero.charName ~= "Malzahar" then return end
 
-local currentVersion = 1.1
+local currentVersion = 1.2
 
 require 'VPrediction'
 require 'SxOrbwalk'
@@ -147,6 +147,10 @@ function Menu()
 			malzCFG.combo:addParam("eUse", "Use E in combo", SCRIPT_PARAM_ONOFF, true)
 			malzCFG.combo:addParam("rUse", "Use R in combo", SCRIPT_PARAM_ONOFF, true)
 			malzCFG.combo:addParam("rCC", "Auto R dangerous spells", SCRIPT_PARAM_ONOFF, false)
+			malzCFG.combo:addSubMenu("R on wich champ =>", "rTarget")
+				for i, target in pairs(gEnemy) do
+					malzCFG.combo.rTarget:addParam(target.charName, target.charName, SCRIPT_PARAM_ONOFF, true)
+				end
 			malzCFG.combo:addParam("comboKey", "Combo Key", SCRIPT_PARAM_ONKEYDOWN, false, string.byte(" "))
 
 		malzCFG:addSubMenu(myHero.charName.." - Harass", "harass")
@@ -436,8 +440,10 @@ function rCombo()
 	for i, target in pairs(gEnemy) do
 		if ValidTarget(target) and not target.dead then
 			if GetDistance(target) < rRange and RREADY then
-				CastSpell(_R, target)
-				UltON = true
+				if malzCFG.combo.rTarget[target.charName] then
+					CastSpell(_R, target)
+					UltON = true
+				end
 			end
 		end
 	end
