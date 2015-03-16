@@ -1,10 +1,9 @@
 -------------------------------
 --	MalzaharMadness by Kqmii --
 -------------------------------
-
 if myHero.charName ~= "Malzahar" then return end
 
-local currentVersion = 1.2
+local currentVersion = 1.3
 
 require 'VPrediction'
 require 'SxOrbwalk'
@@ -19,6 +18,8 @@ local gEnemy = GetEnemyHeroes()
 local ts
 local AlreadyE = false
 local UltON = false
+local IgniteKey = nil
+local IREADY = false
 local stunList = {
 ["katarinarsound"] = true,
 ["AbsoluteZero"] = true,
@@ -48,6 +49,8 @@ function OnLoad()
 	end
 	_G.oldDrawCircle = rawget(_G, 'DrawCircle')
 	_G.DrawCircle = DrawCircle2
+	if myHero:GetSpellData(SUMMONER_1).name:find("summonerdot") then IgniteKey = SUMMONER_1
+	elseif myHero:GetSpellData(SUMMONER_2).name:find("summonerdot") then IgniteKey = SUMMONER_2 end
 end
 function OnTick()
 	ts:update()
@@ -58,6 +61,8 @@ function OnTick()
 	WREADY = (myHero:CanUseSpell(_W) == READY)
 	EREADY = (myHero:CanUseSpell(_E) == READY)
 	RREADY = (myHero:CanUseSpell(_R) == READY)
+	IREADY = (IgniteKey ~= nil and myHero:CanUseSpell(IgniteKey) == READY)
+	
 	if malzCFG.combo.comboKey then
 		killTarget()
 	end
@@ -142,6 +147,7 @@ function Menu()
 	SxOrb = SxOrbWalk(VP)
 	
 		malzCFG:addSubMenu(myHero.charName.." - Combo", "combo")
+			malzCFG.combo:addParam("iUse", "Use Ignite if killable", SCRIPT_PARAM_ONOFF, true)
 			malzCFG.combo:addParam("qUse", "Use Q in combo", SCRIPT_PARAM_ONOFF, true)
 			malzCFG.combo:addParam("wUse", "Use W in combo", SCRIPT_PARAM_ONOFF, true)
 			malzCFG.combo:addParam("eUse", "Use E in combo", SCRIPT_PARAM_ONOFF, true)
@@ -163,6 +169,7 @@ function Menu()
 			malzCFG.KS:addParam("qKs", "KS with Q", SCRIPT_PARAM_ONOFF, true)
 			malzCFG.KS:addParam("eKs", "KS with E", SCRIPT_PARAM_ONOFF, true)
 			malzCFG.KS:addParam("rKs", "KS with R", SCRIPT_PARAM_ONOFF, true)
+			malzCFG.KS:addParam("iKs", "KS with Ignite", SCRIPT_PARAM_ONOFF, true)
 			malzCFG.KS:addParam("KSactif", "KS key toggle", SCRIPT_PARAM_ONKEYTOGGLE, false, GetKey("G"))
 			
 		malzCFG:addSubMenu(myHero.charName.." - Laneclear", "lc")
@@ -186,7 +193,7 @@ function Menu()
 			
 		malzCFG:addTS(ts)
 			ts.name = myHero.charName
-			
+		
 		malzCFG.combo:permaShow("comboKey")
 		malzCFG.harass:permaShow("harassKey")
 		malzCFG.KS:permaShow("KSactif")
@@ -268,6 +275,9 @@ function Harass()
 	end
 end
 function KS()
+	if malzCFG.KS.iKs then
+		iCast()
+	end
 	if malzCFG.KS.eKs then
 		eKs()
 	end
@@ -279,6 +289,9 @@ function KS()
 	end
 end
 function killTarget()
+		if malzCFG.combo.iUse then
+			iCast()
+		end
 		if malzCFG.combo.qUse then
 			qCombo()
 		end
@@ -295,6 +308,18 @@ end
 ---------------------------------------
 --			Spells config            --
 ---------------------------------------
+function iCast()
+	for i, target in pairs(gEnemy) do
+		local iDmg = 50 + (20 * myHero.level)
+		if target ~= nil and target.team ~= myHero.team and target.visible and not target.dead then
+			if IgniteKey ~= nil and IREADY and ValidTarget(target, 600) then
+				if target.health < iDmg then
+					CastSpell(IgniteKey, target)
+				end
+			end
+		end
+	end
+end
 function qCombo()
 if UltON == true then return end
 	for i, target in pairs(gEnemy) do
