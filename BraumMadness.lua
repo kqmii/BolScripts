@@ -3,7 +3,7 @@
 ------------------------------
 if myHero.charName ~= "Braum" then return end
 
-local currentVersion = 1.6
+local currentVersion = 1.7
 
 require 'VPrediction'
 require 'SxOrbwalk'
@@ -42,7 +42,9 @@ Champions = {
 		["Sion"] = {charName = "Sion", skillshots = {
 			["CrypticGaze"] = {name = "Cryptic Gaze", spellName = "CrypticGaze",blockable=true, danger = 0, range=625},
 	}},	
-	
+		["Bard"] = {charName = "Bard", skillshotsh = {
+			["BardQ"] = {name = "Cosmic Binding", spellName = "BardQ", castDelay = 250, projectileSpeed = 1100, range = 850, radius = 108, type="line",unBlockable = false, blockable = true, danger = 1}
+	}},
 	
 		["Nunu"] = {charName = "Nunu", skillshots = {
 			["IceBlast"] = {name = "Ice Blast", spellName="IceBlast", blockable=true, danger = 1, range=550},
