@@ -3,7 +3,7 @@
 ------------------------------
 if myHero.charName ~= "MonkeyKing" then return end
 
-local currentVersion = 1
+local currentVersion = 1.1
 
 require 'SxOrbwalk'
 
