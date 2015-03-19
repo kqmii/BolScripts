@@ -7,8 +7,9 @@
 --*******************************--
 if myHero.charName ~= "Nami" then return end
 
-local currentVersion = 1.51
+local currentVersion = 1.6
 
+local SACLoaded, MMALoaded = nil,nil
 require 'VPrediction'
 require "SxOrbwalk"
 local ts
@@ -136,7 +137,7 @@ end
 function OnLoad()
 	PrintChat ("<font color=\"#33CC99\"><b>NamiMadness by Kqmii</b></font>"..currentVersion.."<font color=\"#33CC99\"><b>Loaded</b></font>")
 	PrintChat ("<b>Report any problem by pm to kqmii on bol</b>")
-	
+	DetectOrbwalker()
 	Menu()
 	updateScript()
 	
@@ -300,9 +301,14 @@ function Menu()
 			NamiCFG.draw:addParam("Lfc", "Activate Lag Free Circles", SCRIPT_PARAM_ONOFF, false)
 			NamiCFG.draw:addParam("CL", "Lag Free Circles Quality", 4, 75, 75, 2000, 0)
 			NamiCFG.draw:addParam("Width", "Lag Free Circles Width", 4, 2, 1, 10, 0)
-				
+	if SACLoaded == true then
+		NamiCFG:addParam("qqq", "SAC Detected", SCRIPT_PARAM_INFO, "")
+	elseif MMALoaded == true then
+		NamiCFG:addParam("qqq", "MMA Detected", SCRIPT_PARAM_INFO, "")
+	else 
 		NamiCFG:addSubMenu("--["..myHero.charName.."]-- Orbwalker", "SxOrb")
 			SxOrb:LoadToMenu(NamiCFG.SxOrb)
+	end			
 end
 function Combo()
 	if NamiCFG.Combo.comboKey then
@@ -311,6 +317,18 @@ function Combo()
 		UseQ()
 		UseW()
 	end
+end
+function DetectOrbwalker()
+	if _G.MMA_LOADED then
+		PrintChat("NamiMadness : MMA Detected")
+		MMALoaded = true
+	elseif _G.Reborn_Loaded then
+		PrintChat("NamiMadness : SAC Detected")
+		SACLoaded = true
+	else
+		PrintChat("NamiMadness : SxOrb Loaded")
+		Sxo = true
+	end	
 end
 function AutoHealAllies()
 	if NamiCFG.healManager.healAllies then
