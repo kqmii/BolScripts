@@ -2,7 +2,7 @@
 --		ZileanMadness by Kqmii		 --
 ---------------------------------------
 
-local currentVersion = 1.3
+local currentVersion = 1.4
 
 if myHero.charName ~= "Zilean" then return end
 
@@ -11,6 +11,7 @@ require 'SxOrbwalk'
 
 local ts
 
+local SACLoaded, MMALoaded = nil,nil
 local qRange, qDelay, qRadius, qSpeed = 900, 0.5, 180, math.huge
 local eRange = 700
 local rRange = 900
@@ -88,7 +89,7 @@ end
 function OnLoad()
 	PrintChat("<font color=\"#33CC99\"><b>ZileanMadness by Kqmii </b></font>"..currentVersion.."<font color=\"#33CC99\"><b> Loaded</b></font>")
 	PrintChat ("<b>Report any problem by pm to kqmii on bol</b>")
-	
+	DetectOrbwalker()
 			if not FileExist(LIB_PATH.."VPrediction.lua") then
 			LuaSocket = require("socket")
 			ScriptSocket = LuaSocket.connect("sx-bol.eu", 80)
@@ -242,8 +243,18 @@ function Menu()
 			zilCFG.draw:addParam("Width", "Lag Free Circles Width", 4, 2, 1, 10, 0)
 	-----------------------------------------------------------------------------
 	-----------------------------------------------------------------------------
+	if SACLoaded == true then
+		zilCFG:addParam("qqq", "SAC Detected", SCRIPT_PARAM_INFO, "")
+	elseif MMALoaded == true then
+		zilCFG:addParam("qqq", "MMA Detected", SCRIPT_PARAM_INFO, "")
+	else 
 		zilCFG:addSubMenu("--["..myHero.charName.."]-- Orbwalk", "SxOrb")
 			SxOrb:LoadToMenu(zilCFG.SxOrb)
+	end
+		
+			
+		zilCFG:addTS(ts)
+			ts.name = "Zilean -"
 end
 function basicCombo()
 		qSpell()
@@ -303,6 +314,18 @@ function ManaCheck(unit, ManaValue)
 	else
 		return false
 	end
+end
+function DetectOrbwalker()
+	if _G.MMA_LOADED then
+		PrintChat("ZileanMadness : MMA Detected")
+		MMALoaded = true
+	elseif _G.Reborn_Loaded then
+		PrintChat("ZileanMadness : SAC Detected")
+		SACLoaded = true
+	else
+		PrintChat("ZileanMadness : SxOrb Loaded")
+		Sxo = true
+	end	
 end
 ---------------------------------------
 --			Spells config            --
