@@ -3,7 +3,7 @@
 ------------------------------
 if myHero.charName ~= "Braum" then return end
 
-local currentVersion = 1.7
+local currentVersion = 1.8
 
 require 'VPrediction'
 require 'SxOrbwalk'
@@ -17,6 +17,7 @@ local gEnemy = GetEnemyHeroes()
 local gAlly = GetAllyHeroes()
 local minion = nil
 local braumAA = 125
+local SACLoaded, MMALoaded = nil,nil
 
 ---------------------------------------
 --			  Skillshot				 --
@@ -353,6 +354,7 @@ Champions = {
 --			  Callbacks			     --
 ---------------------------------------
 function OnLoad()
+	DetectOrbwalker()
 	PrintChat("<font color=\"#33CC99\"><b>BraumMadness by Kqmii </b></font>"..currentVersion.."<font color=\"#33CC99\"><b> Loaded</b></font>")
 	PrintChat("<b>Report any problem by pm to kqmii on bol</b>")
 	minion = minionManager(MINION_ALLY, 1000, myHero, MINION_SORT_HEALTH_ASC)
@@ -482,10 +484,14 @@ function Menu()
 			braumCFG.draw:addParam("Lfc", "Activate Lag Free Circles", SCRIPT_PARAM_ONOFF, false)
 			braumCFG.draw:addParam("CL", "Lag Free Circles Quality", 4, 75, 75, 2000, 0)
 			braumCFG.draw:addParam("Width", "Lag Free Circles Width", 4, 2, 1, 10, 0)
-			
+	if SACLoaded == true then
+		braumCFG:addParam("qqq", "SAC Detected", SCRIPT_PARAM_INFO, "")
+	elseif MMALoaded == true then
+		braumCFG:addParam("qqq", "MMA Detected", SCRIPT_PARAM_INFO, "")
+	else
 		braumCFG:addSubMenu("--["..myHero.charName.."]-- Orbwalker", "SxOrb")
 			SxOrb:LoadToMenu(braumCFG.SxOrb)
-		
+	end
 		braumCFG:addTS(ts)
 			ts.name = "--["..myHero.charName.."]-- Braum"
 		
@@ -532,7 +538,18 @@ function OnProcessSpell(object, spellProc)
 			end
 		end 
 end
-
+function DetectOrbwalker()
+	if _G.MMA_LOADED then
+		PrintChat("BraumMadness : MMA Detected")
+		MMALoaded = true
+	elseif _G.Reborn_Loaded then
+		PrintChat("BraumMadness : SAC Detected")
+		SACLoaded = true
+	else
+		PrintChat("BraumMadness : SxOrb Loaded")
+		Sxo = true
+	end	
+end
 function unBlockableSpells()
 	if unBlockableSpell.spellName == "KatarinaR" and unBlockableObject.charName == "Katarina" then
 		local object = unBlockableObject
