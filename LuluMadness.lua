@@ -5,8 +5,9 @@ if myHero.charName ~= "Lulu" then return end
 require 'VPrediction'
 require 'SxOrbwalk'
 
-local currentVersion = 1.3
+local currentVersion = 1.4
 
+local SACLoaded, MMALoaded = nil,nil
 local qDelay, qWidth, qRange, qSpeed = 0.2, 50, 900, 1600
 local qRange2 = 850
 local qExtended = 1800
@@ -133,7 +134,7 @@ end
 function OnLoad()
 	PrintChat("<font color=\"#33CC99\"><b>LuluMadness by Kqmii </b></font>"..currentVersion.."<font color=\"#33CC99\"><b> Loaded</b></font>")
 	PrintChat("<b>Report any problem by pm to kqmii on bol</b>")
-
+	DetectOrbwalker()
 	minionAlly = minionManager(MINION_ALLY, 925, myHero, MINION_SORT_HEALTH_DEC)
 	minionEnemy = minionManager(MINION_ENEMY, 1100, myHero, MINION_SORT_HEALTH_DEC)
 	JungleMinions = minionManager(MINION_JUNGLE, 1200, myHero, MINION_SORT_MAXHEALTH_DEC)
@@ -269,12 +270,17 @@ function Menu()
 				luluCFG.draw:addParam("Lfc", "Activate Lag Free Circles", SCRIPT_PARAM_ONOFF, false)
 				luluCFG.draw:addParam("CL", "Lag Free Circles Quality", 4, 75, 75, 2000, 0)
 				luluCFG.draw:addParam("Width", "Lag Free Circles Width", 4, 2, 1, 10, 0)
-			
-			luluCFG:addSubMenu("--["..myHero.charName.."]-- Orbwalker", "SxOrb")
-				SxOrb:LoadToMenu(luluCFG.SxOrb)
+			if SACLoaded == true then
+				luluCFG:addParam("qqq", "SAC Detected", SCRIPT_PARAM_INFO, "")
+			elseif MMALoaded == true then
+				luluCFG:addParam("qqq", "MMA Detected", SCRIPT_PARAM_INFO, "")
+			else 
+				luluCFG:addSubMenu("--["..myHero.charName.."]-- Orbwalker", "SxOrb")
+					SxOrb:LoadToMenu(luluCFG.SxOrb)
+			end
 			
 			luluCFG:addTS(ts)
-				ts.name = "--["..myHero.charName.."]-- Lulu"
+				ts.name = "--["..myHero.charName.."]-- "
 		
 			luluCFG.combo.wConfig:permaShow("wUse")
 			luluCFG.combo.rConfig:permaShow("autoUlt")
@@ -384,7 +390,18 @@ function GetBestQPositionFarm()
 		return nil
 	end
 end
-
+function DetectOrbwalker()
+	if _G.MMA_LOADED then
+		PrintChat("LuluMadness : MMA Detected")
+		MMALoaded = true
+	elseif _G.Reborn_Loaded then
+		PrintChat("LuluMadness : SAC Detected")
+		SACLoaded = true
+	else
+		PrintChat("LuluMadness : SxOrb Loaded")
+		Sxo = true
+	end	
+end
 function GetBestQPositionFarm2()
 	local MaxQ = 0 
 	local MaxQPos 
