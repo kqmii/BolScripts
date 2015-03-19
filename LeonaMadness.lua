@@ -7,7 +7,8 @@
 --*******************************--
 if myHero.charName ~= "Leona" then return end
 
-local currentVersion = 1.3
+local currentVersion = 1.4
+local SACLoaded, MMALoaded = nil,nil
 
 require 'VPrediction'
 require 'SxOrbwalk'
@@ -94,6 +95,7 @@ end
 function OnLoad()
 	PrintChat("<font color=\"#33CC99\"><b>LeonaMadness by Kqmii </b></font>"..currentVersion.."<font color=\"#33CC99\"><b> Loaded</b></font>")
 	PrintChat("<b>Report any problem by pm to kqmii on bol</b>")
+		DetectOrbwalker()
 	Menu()
 	updateScript()
 			if not FileExist(LIB_PATH.."VPrediction.lua") then
@@ -275,9 +277,14 @@ function Menu()
 			leoCFG.draw:addParam("Lfc", "Activate Lag Free Circles", SCRIPT_PARAM_ONOFF, false)
 			leoCFG.draw:addParam("CL", "Lag Free Circles Quality", 4, 75, 75, 2000, 0)
 			leoCFG.draw:addParam("Width", "Lag Free Circles Width", 4, 2, 1, 10, 0)
-		
+	if SACLoaded == true then
+		leoCFG:addParam("qqq", "SAC Detected", SCRIPT_PARAM_INFO, "")
+	elseif MMALoaded == true then
+		leoCFG:addParam("qqq", "MMA Detected", SCRIPT_PARAM_INFO, "")
+	else 
 		leoCFG:addSubMenu("--["..myHero.charName.."]-- Orbwalker", "SxOrb")
 			SxOrb:LoadToMenu(leoCFG.SxOrb)
+	end	
 end
 function Combo()
 	if leoCFG.Combo.eUse then
@@ -293,6 +300,18 @@ function Combo()
 		DelayAction(function() ulti() end, 1.65)
 	end
 
+end
+function DetectOrbwalker()
+	if _G.MMA_LOADED then
+		PrintChat("LeonaMadness : MMA Detected")
+		MMALoaded = true
+	elseif _G.Reborn_Loaded then
+		PrintChat("LeonaMadness : SAC Detected")
+		SACLoaded = true
+	else
+		PrintChat("LeonaMadness : SxOrb Loaded")
+		Sxo = true
+	end	
 end
 function MoveToMouse()
 	if leoCFG.uEngage then
