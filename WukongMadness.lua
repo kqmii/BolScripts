@@ -3,12 +3,12 @@
 ------------------------------
 if myHero.charName ~= "MonkeyKing" then return end
 
-local currentVersion = 1.31
+local currentVersion = 1.4
 
 require 'SxOrbwalk'
 
 local ts
-local qRange, eRange, rRange = 300, 650, 315
+local qRange, eRange, rRange = 320, 650, 315
 local gEnemy = GetEnemyHeroes()
 local SACLoaded, MMALoaded = nil,nil
 local slotSmite = nil
@@ -19,18 +19,18 @@ local qSDmg = nil
 local UltON = false
 local Sxo = nil
 local FixItems = true
-Items = {
-		BRK = { id = 3153, range = 450 },
-		BWC = { id = 3144, range = 400 },
-		DFG = { id = 3128, range = 750 },
-		HGB = { id = 3146, range = 400 },
-		RSH = { id = 3074, range = 350 },
-		STD = { id = 3131, range = 350 },
-		TMT = { id = 3077, range = 350 },
-		YGB = { id = 3142, range = 350 },
-		BFT = { id = 3188, range = 750 },
-		RND = { id = 3143, range = 275 }
-	}
+local Items = {
+	BWC = { id = 3144, range = 400, reqTarget = true, slot = nil },
+	DFG = { id = 3128, range = 750, reqTarget = true, slot = nil },
+	HGB = { id = 3146, range = 400, reqTarget = true, slot = nil },
+	BFT = { id = 3188, range = 750, reqTarget = true, slot = nil },
+	BRK = { id = 3153, range = 450, reqTarget = true, slot = nil },
+	RSH = { id = 3074, range = 300, reqTarget = false, slot = nil },
+	STD = { id = 3131, range = 350, reqTarget = false, slot = nil },
+	TMT = { id = 3077, range = 300, reqTarget = false, slot = nil },
+	YGB = { id = 3142, range = 350, reqTarget = false, slot = nil },
+	RND = { id = 3143, range = 275, reqTarget = false, slot = nil },
+}
 InterruptingSpells = {
 		["AbsoluteZero"]				= true,
 		["AlZaharNetherGrasp"]			= true,
@@ -88,6 +88,11 @@ function OnTick()
 		Laneclear()
 	end
 	if wuCFG.draw.Lfc then _G.DrawCircle = DrawCircle2 else _G.DrawCircle = _G.oldDrawCircle end
+	if not wuCFG.combo.comboKey and not wuCFG.harass.harassKey and not wuCFG.laneclear.lKey then
+		for i,attack in pairs(SxOrb.AfterAttackCallbacks) do
+			table.remove(SxOrb.AfterAttackCallbacks, i )
+		end
+	end
 end
 ---------------------------------------
 --			   Drawings				 --
@@ -153,8 +158,7 @@ function Menu()
 	
 	wuCFG:addSubMenu("Wukong - Combo settings", "combo")
 		wuCFG.combo:addParam("useItem", "Use Item in combo", SCRIPT_PARAM_ONOFF, true)
-		wuCFG.combo:addParam("qUse", "Use Q in combo", SCRIPT_PARAM_ONOFF, true)
-		wuCFG.combo:addParam("eUse", "Use E in combo", SCRIPT_PARAM_ONOFF, true)
+		wuCFG.combo:addParam("scUse", "Use smart combo", SCRIPT_PARAM_ONOFF, true)
 		wuCFG.combo:addParam("sUse", "Use Smite in combo", SCRIPT_PARAM_ONOFF, true)
 			wuCFG.combo:addSubMenu("--R Config--", "rConfig")
 			wuCFG.combo.rConfig:addParam("rUse", "Use R in combo", SCRIPT_PARAM_ONOFF, true)
@@ -169,6 +173,7 @@ function Menu()
 		wuCFG.laneclear:addParam("lKey", "Laneclear Key", SCRIPT_PARAM_ONKEYDOWN, false, string.byte("V"))
 		---------------------------------------------------
 		---------------------------------------------------
+	
 	wuCFG:addSubMenu("Wukong - Auto Smite settings", "smite")
 		wuCFG.smite:addParam("redSmite", "Smite Red Buff", SCRIPT_PARAM_ONOFF, true)
 		wuCFG.smite:addParam("blueSmite", "Smite Blue Buff", SCRIPT_PARAM_ONOFF, true)
@@ -229,6 +234,31 @@ function Menu()
 		wuCFG.smite:permaShow("smiteKey")
 		wuCFG.KS:permaShow("KsToggle")
 end
+-- function stopAA()
+		-- SxOrb:DisableAttacks()
+		-- print("ON")
+		-- UltON = true
+	-- return UltON
+-- end
+-- function resumeAA()
+		-- SxOrb:EnableAttacks()
+		-- print("OFF")
+		-- UltON = false
+	-- return UltOn
+-- end
+function OnProcessSpell(unit, spell)
+	if wuCFG.combo.rConfig.rCC then
+		if GetDistance(unit) <= rRange and RREADY then
+			if InterruptingSpells[spell.name] then
+				CastSpell(_R)
+			end
+		end	
+	end
+	-- if unit.isMe and spell.name == "MonkeyKingSpinToWin" then
+		-- stopAA()
+		-- DelayAction(function() resumeAA() end, 4)
+	-- end
+end
 function DetectOrbwalker()
 	if _G.MMA_LOADED then
 		PrintChat("WukongMadness : MMA Detected")
@@ -285,6 +315,7 @@ function KS()
 	end
 end
 function Laneclear()
+if UltON then return end
 		if wuCFG.laneclear.qJClear then
 			qFarm()
 		end
@@ -304,15 +335,6 @@ function Laneclear()
 			end
 		end
 end
-function OnProcessSpell(unit, spell)
-	if wuCFG.combo.rConfig.rCC then
-		if GetDistance(unit) <= rRange and RREADY then
-			if InterruptingSpells[spell.name] then
-				CastSpell(_R)
-			end
-		end	
-	end
-end
 function EnemyNear(range, unit)
     local Enemies = 0
     for _, enemy in ipairs(GetEnemyHeroes()) do
@@ -323,27 +345,51 @@ function EnemyNear(range, unit)
     return Enemies
 end
 function Combo()
-		if wuCFG.combo.useItem then
-			UseItems()
+if not UltOn then
+	target = ts.target
+		if ValidTarget(target) and target ~= nil and target.type == myHero.type then
+			if wuCFG.combo.sUse then
+				comboSmite(target)
+			end
+			if wuCFG.combo.useItem and not UltON then
+				UseItems(target)
+			end
+			if wuCFG.combo.scUse and not MMALoaded and not SACLoaded and not UltON then
+				if GetDistance(target) > 150 then
+					eSpell(target)
+					SxOrb:RegisterAfterAttackCallback(qSpell)
+				else
+					SxOrb:RegisterAfterAttackCallback(qSpell)
+					if not QREADY then
+					DelayAction(function() SxOrb:RegisterAfterAttackCallback(eSpell) end, 0.3)
+					end
+				end
+			elseif not UltON then
+				if GetDistance(target) > 150 then
+					eSpell(target)
+					qSpell(target)
+				else
+					qSpell(target)
+					if not QREADY then
+						eSpell(target)
+					end
+				end
+			end
+			if wuCFG.combo.rConfig.rUse then
+				rSpell(target)
+			end
 		end
-		if wuCFG.combo.sUse then
-			comboSmite()
-		end
-		if wuCFG.combo.qUse then
-			SxOrb:RegisterAfterAttackCallback(qSpell())
-		end
-		if wuCFG.combo.eUse then
-			eSpell()
-		end
-			rSpell()
+	
+end
 end
 function Harass()
-	if not ManaCheck(myHero, wuCFG.harass.manaHarass) then
+	if not ManaCheck(myHero, wuCFG.harass.manaHarass) and not UltON then
+		target = ts.target
 		if wuCFG.harass.qHarass then
-			qSpell()
+			qSpell(target)
 		end
 		if wuCFG.harass.qHarass then
-			eSpell()
+			eSpell(target)
 		end
 	end
 end
@@ -393,23 +439,22 @@ function DrawOutline(x, y, width, height, color)
 	DrawLine(x, 		y + height, x + width + 1, y + height, 1, color)
 end
 -- end credits Extragoz
-function UseItems()
-	for i, target in pairs(gEnemy) do
-		if ValidTarget(target) and not target.dead then
-				if GetDistance(target) < Items.BRK.range then CastItem(3153, target) end
-				if GetDistance(target) < Items.BWC.range then CastItem(3144, target) end
-				if GetDistance(target) < Items.DFG.range then CastItem(3128, target) end
-				if GetDistance(target) < Items.HGB.range then CastItem(3146, target) end
-				if GetDistance(target) < Items.RSH.range then CastItem(3074) end
-				if GetDistance(target) < Items.STD.range then CastItem(3131) end
-				if GetDistance(target) < Items.TMT.range then CastItem(3077) end	
-				if GetDistance(target) < Items.YGB.range then CastItem(3142) end
-				if GetDistance(target) < Items.BFT.range then CastItem(3188, target) end
-				if GetDistance(target) < Items.RND.range then CastItem(3143) end
+function UseItems(target)
+	if target ~= nil and not UltON then
+		for _, item in pairs(Items) do
+			item.slot = GetInventorySlotItem(item.id)
+			if item.slot ~= nil then
+				if item.reqTarget and GetDistance(target) < item.range then
+					CastSpell(item.slot, target)
+				elseif not item.reqTarget then
+					if GetDistance(target) < item.range then
+						CastSpell(item.slot)
+					end
+				end
+			end
 		end
 	end
 end
-
 ---------------------------------------
 --			Spells config            --
 ---------------------------------------
@@ -481,6 +526,7 @@ function useSmite()
 	end
 end				
 function qFarm()
+if UltOn == true then return end
 	for i, minion in pairs(EnemyMinions.objects) do
 		if minion ~= nil and not minion.dead and minion.visible then
 			if GetDistance(minion) < qRange and QREADY then
@@ -497,6 +543,7 @@ function qFarm()
 	end
 end
 function eFarm()
+if UltOn == true then return end
 	for i, minion in pairs(EnemyMinions.objects) do
 		if minion ~= nil and not minion.dead and minion.visible then
 			if GetDistance(minion) < eRange and EREADY then
@@ -512,43 +559,35 @@ function eFarm()
 		end
 	end
 end
-function qSpell()
+function qSpell(target)
 if UltOn == true then return end
-	for i, target in pairs(gEnemy) do
-		if ValidTarget(target) and not target.dead and QREADY then
-			if GetDistance(target) < qRange then
-				CastSpell(_Q)
-			end
-		end
-	end	
-end
-function eSpell()
-if UltOn == true then return end
-	for i, target in pairs(gEnemy) do
-		if ValidTarget(target) and not target.dead and EREADY then
-			if GetDistance(target) <= eRange then
-				CastSpell(_E, target)
-			end
+	if ValidTarget(target) and not target.dead and QREADY then
+		if GetDistance(target) < qRange then
+			CastSpell(_Q)
 		end
 	end
 end
-function rSpell()
-	for i, target in pairs(gEnemy) do	
-		if wuCFG.combo.rConfig.rUse then
-			if ValidTarget(target) and RREADY and not target.dead then
-				if EnemyNear(rRange, myHero) >= wuCFG.combo.rConfig.rEnemy then
-					CastSpell(_R)
-				end
-			end
+function eSpell(target)
+if UltOn == true then return end
+	if ValidTarget(target) and not target.dead and EREADY then
+		if GetDistance(target) <= eRange then
+			CastSpell(_E, target)
 		end
 	end
 end
-function comboSmite()
-	for i, target in pairs(gEnemy) do
-		if ValidTarget(target) and not target.dead then
-			if SREADY and GetDistance(target) < 560 then
-				CastSpell(slotSmite, target)
-			end
+function rSpell(target)
+if UltOn == true then return end	
+	if ValidTarget(target) and RREADY and not target.dead then
+		if EnemyNear(rRange, myHero) >= wuCFG.combo.rConfig.rEnemy then
+			CastSpell(_R)
+		end
+	end
+end
+function comboSmite(target)
+if UltOn == true then return end
+	if ValidTarget(target) and not target.dead then
+		if SREADY and GetDistance(target) < 560 then
+			CastSpell(slotSmite, target)
 		end
 	end
 end
@@ -566,6 +605,7 @@ if UltOn == true then return end
 	end		
 end
 function rKs()
+if UltOn == true then return end
 	for i, target in pairs(gEnemy) do
 		local rDmg = getDmg("R", target, myHero) 
 		if ValidTarget(target) and not target.dead then
@@ -587,6 +627,7 @@ function iKs()
 	end
 end
 function ksSmite()
+if UltOn == true then return end
 	for i, target in pairs(gEnemy) do
 		DmgOnChamp = 20+(8*myHero.level)
 		if target.health < DmgOnChamp*0.95 and ValidTarget(target) and GetDistance(target) <= 560 and SREADY and not target.dead then
