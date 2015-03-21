@@ -3,7 +3,7 @@
 ------------------------------
 if myHero.charName ~= "MonkeyKing" then return end
 
-local currentVersion = 1.3
+local currentVersion = 1.31
 
 require 'SxOrbwalk'
 
@@ -275,7 +275,7 @@ function KS()
 		ksSmite()
 	end
 	if wuCFG.KS.iKS then
-		iKS()
+		iKs()
 	end
 	if wuCFG.KS.eKS then
 		eKs()
