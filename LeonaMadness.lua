@@ -7,7 +7,7 @@
 --*******************************--
 if myHero.charName ~= "Leona" then return end
 
-local currentVersion = 1.4
+local currentVersion = 1.41
 local SACLoaded, MMALoaded = nil,nil
 
 require 'VPrediction'
@@ -261,7 +261,7 @@ function Menu()
 				leoCFG.Combo.uConfig:addParam("noEnemy", "Mini enemies to ultimate on", SCRIPT_PARAM_SLICE, 1, 1, 5, 0)
 			leoCFG.Combo:addParam("comboKey", "Combo key", SCRIPT_PARAM_ONKEYDOWN, false, string.byte(" "))
 			
-		leoCFG:addParam("eMaxRange", "Change E Max range", SCRIPT_PARAM_LIST,875, {"875","865","855","845","835","825","815","800"})
+		leoCFG:addParam("eMaxRange", "Change E Max range", SCRIPT_PARAM_LIST,1, {"875","865","855","845","835","825","815","800"})
 		
 		leoCFG:addParam("wDestroy", "Auto AA-Q-AA-AA Wards", SCRIPT_PARAM_ONKEYTOGGLE, false, GetKey("S"))
 		
