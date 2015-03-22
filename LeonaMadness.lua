@@ -7,7 +7,7 @@
 --*******************************--
 if myHero.charName ~= "Leona" then return end
 
-local currentVersion = 1.41
+local currentVersion = 1.42
 local SACLoaded, MMALoaded = nil,nil
 
 require 'VPrediction'
@@ -287,18 +287,19 @@ function Menu()
 	end	
 end
 function Combo()
-	if leoCFG.Combo.eUse then
-		useE()
-	end
-	if leoCFG.Combo.wUse  then
-		useW()
-	end
-	if leoCFG.Combo.qUse then
-		useQ()
-	end
-	if leoCFG.Combo.rUse then
-		DelayAction(function() ulti() end, 1.65)
-	end
+	target = ts.target
+		if leoCFG.Combo.eUse then
+			useE(target)
+		end
+		if leoCFG.Combo.wUse  then
+			useW(target)
+		end
+		if leoCFG.Combo.qUse then
+			useQ(target)
+		end
+		if leoCFG.Combo.rUse then
+			DelayAction(function() ulti(target) end, 1.65)
+		end
 
 end
 function DetectOrbwalker()
@@ -335,36 +336,25 @@ local addDelay = ((myHero.attackSpeed)+0.1)
 			myHero:Attack(ward)
 			DelayAction(function() CastSpell(_Q) end, addDelay)
 			myHero:Attack(ward)
-			myHero:Attack(ward)
 		end
 	end
 end
-function useQ()
-	if leoCFG.Combo.qUse then
-		for i, target in pairs(GetEnemyHeroes()) do
-			if not target.dead then
-				if GetDistance(target) <= 200 and QREADY and ValidTarget(target) then
-					CastSpell(_Q)
-					myHero:Attack(target)
-				end
-			end
+function useQ(target)
+	if not target.dead then
+		if GetDistance(target) <= 200 and QREADY and ValidTarget(target) then
+			CastSpell(_Q)
+			myHero:Attack(target)
 		end
-	end
+    end	
 end
-function useW()
-	if leoCFG.Combo.wUse then
-		for i, target in ipairs(GetEnemyHeroes()) do
+function useW(target)
 			if not target.dead then
 				if GetDistance(target) <= wRange and WREADY and ValidTarget(target) then
 					CastSpell(_W)
 				end
 			end
-		end
-	end
 end
-function useE()
-	if leoCFG.Combo.eUse then
-		for i, target in pairs(GetEnemyHeroes()) do
+function useE(target)
 			if not target.dead then
 				if leoCFG.eMaxRange == 1 then
 					if target ~= nil and EREADY and ValidTarget(target) then
@@ -438,18 +428,14 @@ function useE()
 						end
 					end
 				end
-			end
-	end
+			
+	
 end
-function ulti()
-	if leoCFG.Combo.rUse then
-		for i, target in pairs(GetEnemyHeroes()) do
-			if not target.dead then
-				local AOECastPosition, MainTargetHitChance, nTargets = VP:GetCircularAOECastPosition(target, rDelay, rRadius, leoCFG.Combo.uConfig.mnRange, rSpeed, myHero)
-					if MainTargetHitChance >= 2 and GetDistance(AOECastPosition) < leoCFG.Combo.uConfig.mnRange and nTargets >= leoCFG.Combo.uConfig.noEnemy and RREADY and ValidTarget(target) then
-						CastSpell(_R, AOECastPosition.x, AOECastPosition.z)
-					end
-			end
+function ulti(target)
+	if not target.dead then
+		local AOECastPosition, MainTargetHitChance, nTargets = VP:GetCircularAOECastPosition(target, rDelay, rRadius, leoCFG.Combo.uConfig.mnRange, rSpeed, myHero)
+		if MainTargetHitChance >= 2 and GetDistance(AOECastPosition) < leoCFG.Combo.uConfig.mnRange and nTargets >= leoCFG.Combo.uConfig.noEnemy and RREADY and ValidTarget(target) then
+			CastSpell(_R, AOECastPosition.x, AOECastPosition.z)
 		end
 	end
 end
