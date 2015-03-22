@@ -3,7 +3,7 @@
 -------------------------------
 if myHero.charName ~= "Malzahar" then return end
 
-local currentVersion = 1.3
+local currentVersion = 1.31
 
 require 'VPrediction'
 require 'SxOrbwalk'
@@ -289,20 +289,21 @@ function KS()
 	end
 end
 function killTarget()
+	target = ts.target
 		if malzCFG.combo.iUse then
 			iCast()
 		end
 		if malzCFG.combo.qUse then
-			qCombo()
+			qCombo(target)
 		end
 		if malzCFG.combo.wUse then
-			wCombo()
+			wCombo(target)
 		end
 		if malzCFG.combo.eUse then
-			eCombo()
+			eCombo(target)
 		end
 		if malzCFG.combo.rUse then
-			DelayAction(function() rCombo() end, 0.870)
+			DelayAction(function() rCombo(target) end, 0.870)
 		end		
 end
 ---------------------------------------
@@ -320,9 +321,8 @@ function iCast()
 		end
 	end
 end
-function qCombo()
+function qCombo(target)
 if UltON == true then return end
-	for i, target in pairs(gEnemy) do
 		if target ~= nil and ValidTarget(target) and not target.dead then
 			if GetDistance(target) < qRange and QREADY then
 				local AOECastPosition, MainTargetHitChance, nTargets = VP:GetLineAOECastPosition(target, qDelay, qWidth, qRange, qSpeed, myHero)
@@ -331,7 +331,6 @@ if UltON == true then return end
 				end
 			end
 		end
-	end
 end
 function qHarass()
 if UltON == true then return end
@@ -379,9 +378,8 @@ if UltON == true then return end
 		end
 	end
 end
-function wCombo()
+function wCombo(target)
 if UltON == true then return end
-	for i, target in pairs(gEnemy) do
 		if ValidTarget(target) and not target.dead then
 			if GetDistance(target) < wRange and WREADY then
 				local CastPosition, HitChance, Position = VP:GetCircularCastPosition(target, wDelay, wRadius, wRange, wSpeed, myHero)
@@ -389,8 +387,7 @@ if UltON == true then return end
 					CastSpell(_W, CastPosition.x, CastPosition.z)
 				end
 			end
-		end
-	end			
+		end		
 end
 function wFarm()
 if UltON == true then return end
@@ -409,15 +406,14 @@ if UltON == true then return end
 		end
 	end
 end
-function eCombo()
+function eCombo(target)
 if UltON == true then return end
-	for i, target in pairs(gEnemy) do
 		if GetDistance(target) < eRange and ValidTarget(target) and not target.dead then
 			if EREADY then 
 				CastSpell(_E, target)
 			end
 		end
-	end
+	
 end
 function eHarass()
 if UltON == true then return end
@@ -461,8 +457,7 @@ function eKs()
 		end
 	end
 end
-function rCombo()
-	for i, target in pairs(gEnemy) do
+function rCombo(target)
 		if ValidTarget(target) and not target.dead then
 			if GetDistance(target) < rRange and RREADY then
 				if malzCFG.combo.rTarget[target.charName] then
@@ -471,7 +466,6 @@ function rCombo()
 				end
 			end
 		end
-	end
 end
 function rKs()
 	if UltON == true then return end
