@@ -3,7 +3,7 @@
 ------------------------------
 if myHero.charName ~= "MonkeyKing" then return end
 
-local currentVersion = 1.4
+local currentVersion = 1.41
 
 require 'SxOrbwalk'
 
@@ -72,6 +72,11 @@ function OnTick()
 	ts:update()
 	EnemyMinions:update()
 	JungleMinions:update()
+	if UltOn then
+		SxOrb:DisableAttacks()
+	else
+		SxOrb:EnableAttacks()
+	end
 	if wuCFG.combo.comboKey then
 		Combo()
 	end
@@ -234,18 +239,6 @@ function Menu()
 		wuCFG.smite:permaShow("smiteKey")
 		wuCFG.KS:permaShow("KsToggle")
 end
--- function stopAA()
-		-- SxOrb:DisableAttacks()
-		-- print("ON")
-		-- UltON = true
-	-- return UltON
--- end
--- function resumeAA()
-		-- SxOrb:EnableAttacks()
-		-- print("OFF")
-		-- UltON = false
-	-- return UltOn
--- end
 function OnProcessSpell(unit, spell)
 	if wuCFG.combo.rConfig.rCC then
 		if GetDistance(unit) <= rRange and RREADY then
@@ -254,10 +247,6 @@ function OnProcessSpell(unit, spell)
 			end
 		end	
 	end
-	-- if unit.isMe and spell.name == "MonkeyKingSpinToWin" then
-		-- stopAA()
-		-- DelayAction(function() resumeAA() end, 4)
-	-- end
 end
 function DetectOrbwalker()
 	if _G.MMA_LOADED then
@@ -528,8 +517,9 @@ end
 function qFarm()
 if UltOn == true then return end
 	for i, minion in pairs(EnemyMinions.objects) do
+		local qDmg = getDmg("Q", minion, myHero)
 		if minion ~= nil and not minion.dead and minion.visible then
-			if GetDistance(minion) < qRange and QREADY then
+			if GetDistance(minion) < qRange and QREADY and minion.health <= qDmg then
 				CastSpell(_Q)
 			end
 		end
@@ -580,6 +570,8 @@ if UltOn == true then return end
 	if ValidTarget(target) and RREADY and not target.dead then
 		if EnemyNear(rRange, myHero) >= wuCFG.combo.rConfig.rEnemy then
 			CastSpell(_R)
+			UltOn = true
+			DelayAction(function() UltOn = false end, 4)
 		end
 	end
 end
