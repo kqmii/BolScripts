@@ -3,7 +3,7 @@
 ------------------------------
 if myHero.charName ~= "MonkeyKing" then return end
 
-local currentVersion = 1.41
+local currentVersion = 1.5
 
 require 'SxOrbwalk'
 
@@ -192,8 +192,6 @@ function Menu()
 		---------------------------------------------------
 		---------------------------------------------------
 	wuCFG:addSubMenu("Wukong - Harass settings", "harass")
-		wuCFG.harass:addParam("qHarass", "Harass with Q", SCRIPT_PARAM_ONOFF, true)
-		wuCFG.harass:addParam("eHarass", "Harass with E", SCRIPT_PARAM_ONOFF, true)
 		wuCFG.harass:addParam("manaHarass", "min. Mana to Harass", SCRIPT_PARAM_SLICE, 50, 0, 100, 0)
 		wuCFG.harass:addParam("harassKey", "Harass key", SCRIPT_PARAM_ONKEYDOWN, false, string.byte("C"))
 		-----------------------------------------------------
@@ -334,54 +332,94 @@ function EnemyNear(range, unit)
     return Enemies
 end
 function Combo()
-if not UltOn then
-	target = ts.target
+	if not UltOn then
+		target = ts.target
 		if ValidTarget(target) and target ~= nil and target.type == myHero.type then
 			if wuCFG.combo.sUse then
 				comboSmite(target)
-			end
-			if wuCFG.combo.useItem and not UltON then
-				UseItems(target)
 			end
 			if wuCFG.combo.scUse and not MMALoaded and not SACLoaded and not UltON then
 				if GetDistance(target) > 150 then
 					eSpell(target)
 					SxOrb:RegisterAfterAttackCallback(qSpell)
+					myHero:Attack(target)
+					if wuCFG.combo.useItem and not UltON then
+						UseItems(target)
+					end
+					if wuCFG.combo.rConfig.rUse and not QREADY and not EREADY then
+						rSpell(target)
+					end
 				else
 					SxOrb:RegisterAfterAttackCallback(qSpell)
+					myHero:Attack(target)
+					if wuCFG.combo.useItem and not UltON then
+						UseItems(target)
+					end
 					if not QREADY then
 					DelayAction(function() SxOrb:RegisterAfterAttackCallback(eSpell) end, 0.3)
+					end
+					if wuCFG.combo.rConfig.rUse and not QREADY and not EREADY then
+						rSpell(target)
 					end
 				end
 			elseif not UltON then
 				if GetDistance(target) > 150 then
 					eSpell(target)
 					qSpell(target)
+					if wuCFG.combo.useItem and not UltON then
+						UseItems(target)
+					end
+					if wuCFG.combo.rConfig.rUse and not QREADY and not EREADY then
+						rSpell(target)
+					end
 				else
 					qSpell(target)
+					if wuCFG.combo.useItem and not UltON then
+						UseItems(target)
+					end
 					if not QREADY then
 						eSpell(target)
 					end
+					if wuCFG.combo.rConfig.rUse and not QREADY and not EREADY then
+						rSpell(target)
+					end
 				end
 			end
-			if wuCFG.combo.rConfig.rUse then
-				rSpell(target)
-			end
 		end
-	
-end
+	end
 end
 function Harass()
 	if not ManaCheck(myHero, wuCFG.harass.manaHarass) and not UltON then
 		target = ts.target
-		if wuCFG.harass.qHarass then
-			qSpell(target)
-		end
-		if wuCFG.harass.qHarass then
-			eSpell(target)
+		if ValidTarget(target) and not target.dead then
+		if not SACLoaded and not MMALoaded then
+			if GetDistance(target) > qRange then
+				if GetDistance(target) < eRange then
+					eSpell(target)
+					SxOrb:RegisterAfterAttackCallback(qSpell)
+					UseItems(target)
+				end
+			end
+			if GetDistance(target) < qRange then
+				qSpell(target)
+				if GetDistance(target) < eRange and not QREADY then
+					SxOrb:RegisterAfterAttackCallback(eSpell)
+				end
+				UseItems(target)
+			end
+		else
+			if GetDistance(target) < eRange then
+				eSpell(target)
+			end
+			if GetDistance(target) < qRange then
+				qSpell(target)
+			end
+				UseItems(target)
+			end
 		end
 	end
 end
+
 -- start credits Extragoz
 function MonsterDraw(minion)
 	local isEpicMonster = minion.charName == "Dragon" or minion.charName == "Nashor" 
@@ -571,7 +609,7 @@ if UltOn == true then return end
 		if EnemyNear(rRange, myHero) >= wuCFG.combo.rConfig.rEnemy then
 			CastSpell(_R)
 			UltOn = true
-			DelayAction(function() UltOn = false end, 4)
+			DelayAction(function() UltOn = false end, 2.5)
 		end
 	end
 end
