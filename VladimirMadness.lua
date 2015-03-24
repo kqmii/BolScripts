@@ -884,7 +884,7 @@ end
 --------
 function UseZhonya()
 	if wON == true then return end
-	if EnemyNear(vladCFG.autoZho.rZenemy, myHero) > 0 then
+	if EnemyNear(vladCFG.autoZho.rZenemy, myHero) > 0 and not WSpell.ready then
 		if HpCheck(myHero, vladCFG.autoZho.zLowHp) then
 			AutoZhonya()
 		end
