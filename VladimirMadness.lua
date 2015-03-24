@@ -3,10 +3,11 @@
 --------------------------------
 if myHero.charName ~= "Vladimir" then return end
 
-local currentVersion = 1.2
+local currentVersion = 1.21
 
 local color = ARGB(255,0,255,0)
 local eTick = 0
+local wON = false
 local Items = {
 	BWC = { id = 3144, range = 400, reqTarget = true, slot = nil },
 	DFG = { id = 3128, range = 750, reqTarget = true, slot = nil },
@@ -287,7 +288,7 @@ Champions = {
 			["Dazzle"] = {name = "Dazzle", spellName="Dazzle", blockable=true, danger = 0, range=625},
 	}},
 		["FiddleSticks"] = {charName = "FiddleSticks", skillshots = {
-			["FiddlesticksDarkWind"] = {name = "DarkWind", spellName="FiddlesticksDarkWind", blockable=true, danger = 0, range=750},
+			["FiddlesticksDarkWind"] = {name = "DarkWind", spellName="FiddlesticksDarkWind", danger = 0, range=750},
 	}}, 
 		["Syndra"] = {charName = "Syndra", skillshots = { -- Q added in 1.10
 			["SyndraQ"] = {name = "Q", spellName = "SyndraQ", castDelay = 250, projectileName = "Syndra_Q_cas.troy", projectileSpeed = 500, range = 800, radius = 175, type = "circular",  danger = 0},
@@ -530,7 +531,7 @@ end
 function Vars()
 	QSpell = { name = "Transfusion", range = 600, delay = nil, speed = nil, radius = nil, ready = false, }
 	WSpell = { name = "Sanguine Pool", range = nil, delay = nil, speed = nil, radius = 150, ready = false }
-	ESpell = { name = "Tides of Blood", range = 600, delay = nil, speed = nil, radius = nil, ready = false }
+	ESpell = { name = "Tides of Blood", range = 580, delay = nil, speed = nil, radius = nil, ready = false }
 	RSpell = { name = "Hemoplague", range = 620, delay = 0, speed = math.huge, radius = 165, ready = false }
 	Ignite = { name = "summonerdot", range = 600, slot = nil, ready = false }
 	
@@ -674,6 +675,8 @@ function OnProcessSpell(object, spellProc)
 							if WSpell.ready then
 								if spellProc.endPos.x == myHero.x+20 and spellProc.endPos.z == myHero.z+20 and vladCFG.autoW.skillInc.wSkillInc and HpCheck(myHero, vladCFG.autoW.skillInc.wSkillIncHp) then
 									CastSpell(_W)
+									wON = true
+									DelayAction(function() wON = false end, 2) 
 								end
 							end
 						end
@@ -873,11 +876,14 @@ function wAuto()
 	if WSpell.ready and EnemyNear(vladCFG.autoW.wLowHp.rEnemy, myHero) > 0 then
 		if HpCheck(myHero, vladCFG.autoW.wLowHp.LowHp) then
 			CastSpell(_W)
+			wON = true
+			DelayAction(function() wON = false end, 2) 
 		end
 	end
 end
 --------
 function UseZhonya()
+	if wON == true then return end
 	if EnemyNear(vladCFG.autoZho.rZenemy, myHero) > 0 then
 		if HpCheck(myHero, vladCFG.autoZho.zLowHp) then
 			AutoZhonya()
