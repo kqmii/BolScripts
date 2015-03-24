@@ -3,9 +3,10 @@
 --------------------------------
 if myHero.charName ~= "Vladimir" then return end
 
-local currentVersion = 1.1
+local currentVersion = 1.2
 
 local color = ARGB(255,0,255,0)
+local eTick = 0
 local Items = {
 	BWC = { id = 3144, range = 400, reqTarget = true, slot = nil },
 	DFG = { id = 3128, range = 750, reqTarget = true, slot = nil },
@@ -18,18 +19,20 @@ local Items = {
 	YGB = { id = 3142, range = 350, reqTarget = false, slot = nil },
 	RND = { id = 3143, range = 275, reqTarget = false, slot = nil },
 }
+local DefItems = {
+	ZOH = { id = 3157, range = nil, reqTarget = false, slot = nil },
+	WOO = { id = 3090, range = nil, reqTarget = false, slot = nil },
+}
 Champions = {
 		["Lux"] = {charName = "Lux", skillshots = {
 			["LuxLightBinding"] = {name = "Light Binding", spellName = "LuxLightBinding", castDelay = 250, projectileName = "LuxLightBinding_mis.troy", projectileSpeed = 1200, range = 1300, radius = 80, type = "line",  danger = 1},
 			["LuxLightStrikeKugel"] = {name = "Lucent Singularity", spellName = "LuxLightStrikeKugel", castDelay = 250, projectileName = "LuxLightstrike_mis.troy", projectileSpeed = 1400, range = 1100, radius = 275, type = "circular",  danger = 0},
 			["LuxMaliceCannon"] = {name = "Final Spark", spellName = "LuxMaliceCannon", castDelay = 1375, projectileName = "Enrageweapon_buf_02.troy", projectileSpeed = math.huge, range = 3500, radius = 190, type = "line",  danger = 1},
 	}},
-	
 		["Braum"] = {charName = "Braum", skillshots = {
 			["Winters Bite"] = {name = "Winters Bite", spellName = "BraumQMissile", castDelay = 0, projectileName = "Braum_Base_Q_mis.troy", projectileSpeed = 1700, range = 1000, radius = 100, type = "line",  danger = 1},
 			["Glacial Fissure"] = {name = "Glacial Fissure", spellName = "BraumRWrapper", castDelay = 510, projectileName = "Braum_Base_R_mis.troy", projectileSpeed = 1438, range = 1250, radius = 100, type = "line",  danger = 1}, 
 	}},	
-	
 		["Nidalee"] = {charName = "Nidalee", skillshots = {
 			["JavelinToss"] = {name = "Javelin Toss", spellName = "JavelinToss", castDelay = 125, projectileName = "nidalee_javelinToss_mis.troy", projectileSpeed = 1300, range = 1500, radius = 60, type = "line",  danger = 1}
 	}},
@@ -39,14 +42,12 @@ Champions = {
 		["Sion"] = {charName = "Sion", skillshots = {
 			["CrypticGaze"] = {name = "Cryptic Gaze", spellName = "CrypticGaze",blockable=true, danger = 0, range=625},
 	}},	
-		["Bard"] = {charName = "Bard", skillshotsh = {
+		["Bard"] = {charName = "Bard", skillshots = {
 			["BardQ"] = {name = "Cosmic Binding", spellName = "BardQ", castDelay = 250, projectileSpeed = 1100, range = 850, radius = 108, type="line", danger = 1}
-	}},
-	
+	}},	
 		["Nunu"] = {charName = "Nunu", skillshots = {
 			["IceBlast"] = {name = "Ice Blast", spellName="IceBlast", blockable=true, danger = 1, range=550},
-	}},	
-	
+	}},		
 		["Akali"] = {charName = "Akali", skillshots = {
 			["AkaliMota"] = {name = "Mark of the assassin", spellName = "AkaliMota", castDelay = 125, projectileName = "AkaliMota_mis.troy", projectileSpeed = 1300, range = 1500, radius = 60, type = "line",  danger = 1}
 	}},
@@ -195,7 +196,6 @@ Champions = {
 		["Veigar"] = {charName = "Veigar", skillshots = {
 			["VeigarDarkMatter"] = {name = "VeigarDarkMatter", spellName = "VeigarDarkMatter", castDelay = 250, projectileName = "!", projectileSpeed = 900, range = 900, radius = 225, type = "circular",  danger = 0}
 	}},
-	
 		["Diana"] = {charName = "Diana", skillshots = {
 			["DianaArc"] = {name = "DianaArc", spellName = "DianaArc", castDelay = 250, projectileName = "Diana_Q_trail.troy", projectileSpeed = 1600, range = 1000, radius = 195, type="circular",  danger = 0},
 	}},
@@ -246,8 +246,6 @@ Champions = {
 			["GravesChargeShot"] = {name = "LuxLightStrikeKugel", spellName = "GravesChargeShot", castDelay = 250, projectileName = "LuxLightstrike_mis.troy", projectileSpeed = 1400, range = 1100, radius = 275, type = "line",  danger = 1},
 			
 	}},	
-	
-	
 		["Lucian"] = {charName = "Lucian", skillshots = {
 			["LucianQ"] = {name = "LucianQ", spellName = "LucianQ", castDelay = 350, projectileName = "Lucian_Q_laser.troy", projectileSpeed = math.huge, range = 570*2, radius = 65, type = "line",  danger = 0},
 			["LucianW"] = {name = "LucianW", spellName = "LucianW", castDelay = 300, projectileName = "Lucian_W_mis.troy", projectileSpeed = 1600, range = 1000, radius = 80, type = "line",  danger = 0},
@@ -316,15 +314,12 @@ Champions = {
 			["LissandraW"] = {name = "LissandraW", spellName = "LissandraW", castDelay = 10, projectileName = "Zyra_Dummy_Controller.troy", projectileSpeed = 3850, range = 430, radius = 275, type = "line",  danger = 1},
 			
 	}},	
-	
 		["Riven"] = {charName = "Riven", skillshots = {
 			["rivenizunablade"] = {name = "rivenizunablade", spellName = "rivenizunablade", castDelay = 234, projectileName = "Riven_Base_R_Mis_Middle.troy", projectileSpeed = 2210, range = 1000, radius = 180, type = "line",  danger = 1}
 	}},		
-	
 		["Pantheon"] = {charName = "Pantheon", skillshots = {
 			["Pantheon_Throw"] = {name = "Pantheon_Throw", spellName = "Pantheon_Throw", castDelay = 250, projectileName = "pantheon_spear_mis.troy", projectileSpeed = 1500, range = 1500, radius = 140,  danger = 1}
 	}},
-	
 		["Sejuani"] = {charName = "Sejuani", skillshots = {
 			["SejuaniGlacialPrisonCast"] = {name = "SejuaniGlacialPrisonCast", spellName = "SejuaniGlacialPrisonCast", castDelay = 249, projectileName = "Sejuani_R_mis.troy", projectileSpeed = 1628, range = 1100, radius = 250, type = "line",  danger = 1}
 	}},	
@@ -376,8 +371,17 @@ function OnTick()
 	if vladCFG.KS.ksToggle then
 		Ks()
 	end
-	if vladCFG.autoE.eAutoKey then
+	if vladCFG.autoE.eAutoKey and GetTickCount() - eTick >= 9500 then
 		eAuto()
+	end
+	if vladCFG.autoW.autoWkey then
+		wAuto()
+	end
+	if vladCFG.autoZho.useZho then
+		UseZhonya()
+	end
+	if vladCFG.forceR then
+		rForce(target)
 	end
 	if vladCFG.draw.Lfc then _G.DrawCircle = DrawCircle2 else _G.DrawCircle = _G.oldDrawCircle end
 end
@@ -394,9 +398,9 @@ function OnDraw()
 		end
 		if vladCFG.draw.cTarget then
 			if ValidTarget(target) and not target.dead then
-				DrawCircle(target.x, target.y, target.z, 90, 0xF0FFFF)
-				DrawCircle(target.x, target.y, target.z, 100, 0xF0FFFF)
-				DrawCircle(target.x, target.y, target.z, 110, 0xF0FFFF)
+				DrawCircle(target.x, target.y, target.z, 90, color)
+				DrawCircle(target.x, target.y, target.z, 100, color)
+				DrawCircle(target.x, target.y, target.z, 110, color)
 			end
 		end
 	end
@@ -451,22 +455,27 @@ function Menu()
 		vladCFG:addSubMenu(myHero.charName.." - Harass", "harass")
 			vladCFG.harass:addParam("qHarass", "Use Q in harass", SCRIPT_PARAM_ONOFF, true)
 			vladCFG.harass:addParam("eHarass", "Use E in harass", SCRIPT_PARAM_ONOFF, true)
-			vladCFG.harass:addParam("harassToggle", "Harass toggle key(C)", SCRIPT_PARAM_ONKEYDOWN, false, string.byte("C"))
+			vladCFG.harass:addParam("harassToggle", "Harass toggle key(C)", SCRIPT_PARAM_ONKEYTOGGLE, false, GetKey("Y"))
 			
 		vladCFG:addSubMenu(myHero.charName.." - Laneclear", "laneclear")
 			vladCFG.laneclear:addParam("qLc", "Use Q in laneclear", SCRIPT_PARAM_ONOFF, true)
 			vladCFG.laneclear:addParam("eLc", "Use E in laneclear", SCRIPT_PARAM_ONOFF, true)
-			vladCFG.laneclear:addParam("lcKey", "Laneclear key (V)", SCRIPT_PARAM_ONKEYDOWN, false, string.byte("V"))
+			vladCFG.laneclear:addParam("lcKey", "Laneclear key ", SCRIPT_PARAM_ONKEYDOWN, false, string.byte("V"))
 		
 		vladCFG:addSubMenu(myHero.charName.." - KS", "KS")
 			vladCFG.KS:addParam("qKS", "KS with Q", SCRIPT_PARAM_ONOFF, true)
+			vladCFG.KS:addParam("wKS", "KS with W", SCRIPT_PARAM_ONOFF, false)
 			vladCFG.KS:addParam("eKS", "KS with E", SCRIPT_PARAM_ONOFF, true)
 			if Ignite.slot ~= nil then
 				vladCFG.KS:addParam("iKS", "KS with Ignite", SCRIPT_PARAM_ONOFF, true)
 			end
-			vladCFG.KS:addParam("ksToggle", "KS toggle key(H)", SCRIPT_PARAM_ONKEYTOGGLE, false, GetKey("H"))
+			vladCFG.KS:addParam("ksToggle", "KS toggle key", SCRIPT_PARAM_ONKEYTOGGLE, false, GetKey("H"))
 		
 		vladCFG:addSubMenu(myHero.charName.." - Auto W", "autoW")
+			vladCFG.autoW:addSubMenu("When low hp", "wLowHp")
+				vladCFG.autoW.wLowHp:addParam("useWLowHp", "Use W when lowhp & enemy near", SCRIPT_PARAM_ONOFF, true)
+				vladCFG.autoW.wLowHp:addParam("rEnemy", "Range to detect enemy near", SCRIPT_PARAM_SLICE, 600, 0, 1200,0)
+				vladCFG.autoW.wLowHp:addParam("LowHp", "% HP left", SCRIPT_PARAM_SLICE, 20, 0, 100, 0)
 			vladCFG.autoW:addSubMenu("When skillshot incoming", "skillInc")
 				vladCFG.autoW.skillInc:addParam("wSkillInc", "W when skillshot incoming", SCRIPT_PARAM_ONOFF, true)
 				vladCFG.autoW.skillInc:addParam("wSkillIncHp", "% hp left to W skillshot", SCRIPT_PARAM_SLICE, 20, 0, 100, 0)
@@ -478,11 +487,16 @@ function Menu()
 						end
 					end
 				end
-				vladCFG.autoW:addParam("autoWkey", "Auto W key toggle(T)", SCRIPT_PARAM_ONKEYTOGGLE, false, GetKey("T"))
+				vladCFG.autoW:addParam("autoWkey", "Auto W key toggle", SCRIPT_PARAM_ONKEYTOGGLE, false, GetKey("T"))
 		
 		vladCFG:addSubMenu(myHero.charName.." - Auto E", "autoE")
 			vladCFG.autoE:addParam("eAutoUse", "Auto E to keep 4 stacks", SCRIPT_PARAM_ONOFF, true)
-			vladCFG.autoE:addParam("eAutoKey", "Auto E toggle key(G)", SCRIPT_PARAM_ONKEYTOGGLE, false, GetKey("G"))
+			vladCFG.autoE:addParam("eAutoKey", "Auto E toggle key", SCRIPT_PARAM_ONKEYTOGGLE, false, GetKey("G"))
+			
+		vladCFG:addSubMenu(myHero.charName.." - Auto Zhonya/Wooglets", "autoZho")
+			vladCFG.autoZho:addParam("useZho", "Use auto Zhonya/Wooglets", SCRIPT_PARAM_ONOFF, true)
+			vladCFG.autoZho:addParam("rZenemy", "Range to detect enemy near", SCRIPT_PARAM_SLICE, 600, 0, 1200, 0)
+			vladCFG.autoZho:addParam("zLowHp", "% Hp left", SCRIPT_PARAM_SLICE, 20, 0, 100, 0)
 		
 		vladCFG:addSubMenu(myHero.charName.." - Drawings", "draw")
 			vladCFG.draw:addParam("qDraw", "Draw Q range", SCRIPT_PARAM_ONOFF, true)
@@ -503,6 +517,9 @@ function Menu()
 			vladCFG:addSubMenu(myHero.charName.." - Orbwalker", "SxOrb")
 				SxOrb:LoadToMenu(vladCFG.SxOrb)
 		end	
+		
+		vladCFG:addParam("forceR", "Force R use", SCRIPT_PARAM_ONKEYDOWN, false, string.byte("S"))
+		
 		vladCFG.combo:permaShow("comboKey")
 		vladCFG.laneclear:permaShow("lcKey")
 		vladCFG.harass:permaShow("harassToggle")
@@ -603,6 +620,18 @@ function UseItems(target)
 		end
 	end
 end
+function AutoZhonya()
+	if target ~= nil then
+		for d, items in pairs(DefItems) do
+			items.slot = GetInventorySlotItem(items.id)
+			if items.slot ~= nil then
+				if not items.reqTarget then
+					CastSpell(items.slot)
+				end
+			end
+		end
+	end			
+end
 function HpCheck(unit, HealthValue)
 	if unit.health < (unit.maxHealth * (HealthValue/100))
 		then return true
@@ -619,6 +648,15 @@ function EnemyNear(range, unit)
     end
     return Enemies
 end
+function Recalling()
+  for i = 1, myHero.buffCount do
+    local recallBuff = myHero:getBuff(i)
+    if recallBuff.valid and recallBuff.name:lower():find('recall') then
+      return true
+    end	
+  end
+  return false
+end
 function OnProcessSpell(object, spellProc)
 	if myHero.dead then return end
 	if vladCFG.autoW.autoWkey then
@@ -634,7 +672,7 @@ function OnProcessSpell(object, spellProc)
 					if GetDistance(spellProc.startPos) <= range then
 						if vladCFG.autoW.skillInc[spellProc.name] then
 							if WSpell.ready then
-								if spellProc.endPos.x ~= myHero.x+20 and spellProc.endPos.z ~= myHero.z+20 and vladCFG.autoW.skillInc.wSkillInc and HpCheck(myHero, vladCFG.autoW.skillInc.wSkillIncHp) then
+								if spellProc.endPos.x == myHero.x+20 and spellProc.endPos.z == myHero.z+20 and vladCFG.autoW.skillInc.wSkillInc and HpCheck(myHero, vladCFG.autoW.skillInc.wSkillIncHp) then
 									CastSpell(_W)
 								end
 							end
@@ -643,6 +681,9 @@ function OnProcessSpell(object, spellProc)
 				end
 			end
 		end
+	end
+	if object.team == myHero.team and spellProc.name == myHero:GetSpellData(_E).name then 
+		eTick = GetTickCount()
 	end
 end
 function Combo(target)
@@ -679,6 +720,9 @@ function Ks()
 	if vladCFG.KS.qKS then
 		qKs()
 	end
+	if vladCFG.KS.wKS then
+		wKs()
+	end
 	if vladCFG.KS.eKS then
 		eKs()
 	end
@@ -712,6 +756,26 @@ function rSpell(target)
 			end
 		end
 	end	
+end
+function rForce()
+	for i, Target in ipairs(GetEnemyHeroes()) do
+		local rDmg = getDmg("R", Target, myHero)
+		if ValidTarget(Target) and Target.visible and not Target.dead and Target ~= nil then
+			if RSpell.ready then
+				if  Target.health > rDmg then
+					local AOECastPosition, MainTargetHitChance, nTargets = VP:GetCircularAOECastPosition(Target, RSpell.delay, RSpell.radius, RSpell.range, RSpell.speed, myHero)
+					if MainTargetHitChance >= 2 and GetDistance(AOECastPosition) < RSpell.range and nTargets >= 1 or nTargets >= 2 or nTargets >= 3 or nTargets >= 4 or nTargets == 5 then
+						CastSpell(_R, AOECastPosition.x, AOECastPosition.z)
+					end
+				elseif Target.health < rDmg then
+					local AOECastPosition, MainTargetHitChance, nTargets = VP:GetCircularAOECastPosition(Target, RSpell.delay, RSpell.radius, RSpell.range, RSpell.speed, myHero)
+					if MainTargetHitChance >= 2 and GetDistance(AOECastPosition) < RSpell.range and nTargets >= 1 then
+						CastSpell(_R, AOECastPosition.x, AOECastPosition.z)
+					end
+				end
+			end
+		end
+	end
 end
 ---------
 function qFarm()
@@ -759,6 +823,18 @@ function qKs()
 		end
 	end
 end
+function wKs()
+	for i, enemy in ipairs(GetEnemyHeroes()) do
+		local wDmg = getDmg("W", enemy, myHero)
+		if enemy ~= nil and enemy.team ~= myHero.team and enemy.visible and not enemy.dead then
+			if WSpell.ready and GetDistance(enemy) < WSpell.radius and ValidTarget(enemy) then
+				if enemy.health < wDmg then
+					CastSpell(_W)
+				end
+			end
+		end
+	end
+end
 function eKs()
 	for i, enemy in ipairs(GetEnemyHeroes()) do
 		local eDmg = getDmg("E", enemy, myHero)
@@ -785,9 +861,26 @@ function iKs()
 end
 --------
 function eAuto()
-	if vladCFG.autoE.eAutoUse then
-		if ESpell.ready then
-			CastSpell(_E)
+	if not Recalling() then
+		if vladCFG.autoE.eAutoUse then
+			if ESpell.ready then
+				CastSpell(_E)
+			end
+		end
+	end
+end
+function wAuto()
+	if WSpell.ready and EnemyNear(vladCFG.autoW.wLowHp.rEnemy, myHero) > 0 then
+		if HpCheck(myHero, vladCFG.autoW.wLowHp.LowHp) then
+			CastSpell(_W)
+		end
+	end
+end
+--------
+function UseZhonya()
+	if EnemyNear(vladCFG.autoZho.rZenemy, myHero) > 0 then
+		if HpCheck(myHero, vladCFG.autoZho.zLowHp) then
+			AutoZhonya()
 		end
 	end
 end
