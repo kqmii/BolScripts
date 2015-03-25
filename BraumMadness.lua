@@ -3,7 +3,7 @@
 ------------------------------
 if myHero.charName ~= "Braum" then return end
 
-local currentVersion = 1.8
+local currentVersion = 1.81
 
 require 'VPrediction'
 require 'SxOrbwalk'
@@ -481,6 +481,7 @@ function Menu()
 			braumCFG.draw:addParam("qDraw", "Draw Q range", SCRIPT_PARAM_ONOFF, true)
 			braumCFG.draw:addParam("wDraw", "Draw W range", SCRIPT_PARAM_ONOFF, true)		
 			braumCFG.draw:addParam("rDraw", "Draw R range", SCRIPT_PARAM_ONOFF, true)
+			braumCFG.draw:addParam("text", "Target Selected Chat text", SCRIPT_PARAM_ONOFF, false)
 			braumCFG.draw:addParam("Lfc", "Activate Lag Free Circles", SCRIPT_PARAM_ONOFF, false)
 			braumCFG.draw:addParam("CL", "Lag Free Circles Quality", 4, 75, 75, 2000, 0)
 			braumCFG.draw:addParam("Width", "Lag Free Circles Width", 4, 2, 1, 10, 0)
@@ -618,10 +619,14 @@ function OnWndMsg(msg, key)
 		if enemySelected then
 			if not targetSelected or targetSelected.hash ~= enemySelected.hash then
 				targetSelected = enemySelected
-				print('Target selected: '..targetSelected.charName)
+				if braumCFG.draw.text then
+					print('Target selected: '..targetSelected.charName)
+				end
 			else
 				targetSelected = nil
-				print('Target unselected!')
+				if braumCFG.draw.text then
+					print('Target unselected!')
+				end
 			end
 		end
 		
