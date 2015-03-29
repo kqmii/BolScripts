@@ -454,7 +454,7 @@ function Menu()
 			vladCFG.combo:addParam("comboKey", "Combo key (space)", SCRIPT_PARAM_ONKEYDOWN, false, string.byte(" "))
 			
 		vladCFG:addSubMenu(myHero.charName.." - Harass", "harass")
-			vladCFG.harass:addParam("mode", "Change key mode 2xF9", SCRIPT_PARAM_LIST, 1, {"Toggle", "Key Press"})
+			vladCFG.harass:addParam("mode", "Change key mode 2xF9", SCRIPT_PARAM_LIST, 1, {"Toggle", "Key Down"})
 			vladCFG.harass:addParam("qHarass", "Use Q in harass", SCRIPT_PARAM_ONOFF, true)
 			vladCFG.harass:addParam("eHarass", "Use E in harass", SCRIPT_PARAM_ONOFF, true)
 			if vladCFG.harass.mode == 1 then
