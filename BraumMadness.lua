@@ -3,7 +3,7 @@
 ---------------------------
 if myHero.charName ~= "Braum" then return end
 
-local currentVersion = 1.9
+local currentVersion = 1.91
 local Updater = true
 
 Champions = {
@@ -360,12 +360,13 @@ end
 function CleanTick()
 	Checks()
 	ComboKey = braumCFG.combo.comboKey
-	HarassKey = braumCFG.combo.harassToggle
+	HarassKey = braumCFG.harass.harassToggle
 	if ComboKey then
 		Combo(target)
 	end
 	if HarassKey then
 		Harass(target)
+		myHero:MoveTo(mousePos.x, mousePos.z)
 	end
 	if braumCFG.draw.Lfc then 
 		_G.DrawCircle = DrawCircle2 
