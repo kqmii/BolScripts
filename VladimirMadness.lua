@@ -3,7 +3,7 @@
 --------------------------------
 if myHero.charName ~= "Vladimir" then return end
 
-local currentVersion = 1.21
+local currentVersion = 1.3
 
 local color = ARGB(255,0,255,0)
 local eTick = 0
@@ -363,7 +363,7 @@ function OnTick()
 	if vladCFG.combo.comboKey then
 		Combo(target)
 	end
-	if vladCFG.harass.harassToggle then
+	if vladCFG.harass.harassToggle or vladCFG.harass.harassKey then
 		Harass(target)
 	end
 	if vladCFG.laneclear.lcKey then
@@ -454,10 +454,14 @@ function Menu()
 			vladCFG.combo:addParam("comboKey", "Combo key (space)", SCRIPT_PARAM_ONKEYDOWN, false, string.byte(" "))
 			
 		vladCFG:addSubMenu(myHero.charName.." - Harass", "harass")
+			vladCFG.harass:addParam("mode", "Change key mode 2xF9", SCRIPT_PARAM_LIST, 1, {"Toggle", "Key Press"})
 			vladCFG.harass:addParam("qHarass", "Use Q in harass", SCRIPT_PARAM_ONOFF, true)
 			vladCFG.harass:addParam("eHarass", "Use E in harass", SCRIPT_PARAM_ONOFF, true)
-			vladCFG.harass:addParam("harassToggle", "Harass toggle key(C)", SCRIPT_PARAM_ONKEYTOGGLE, false, GetKey("Y"))
-			
+			if vladCFG.harass.mode == 1 then
+				vladCFG.harass:addParam("harassToggle", "Harass toggle key", SCRIPT_PARAM_ONKEYTOGGLE, false, GetKey("Y"))
+			elseif vladCFG.harass.mode == 2 then
+				vladCFG.harass:addParam("harassKey", "Harass On key down", SCRIPT_PARAM_ONKEYDOWN, false, GetKey("C"))
+			end
 		vladCFG:addSubMenu(myHero.charName.." - Laneclear", "laneclear")
 			vladCFG.laneclear:addParam("qLc", "Use Q in laneclear", SCRIPT_PARAM_ONOFF, true)
 			vladCFG.laneclear:addParam("eLc", "Use E in laneclear", SCRIPT_PARAM_ONOFF, true)
@@ -523,7 +527,11 @@ function Menu()
 		
 		vladCFG.combo:permaShow("comboKey")
 		vladCFG.laneclear:permaShow("lcKey")
-		vladCFG.harass:permaShow("harassToggle")
+		if vladCFG.harass.mode == 1 then
+			vladCFG.harass:permaShow("harassToggle")
+		else
+			vladCFG.harass:permaShow("harassKey")
+		end
 		vladCFG.KS:permaShow("ksToggle")
 		vladCFG.autoW:permaShow("autoWkey")
 		vladCFG.autoE:permaShow("eAutoKey")
