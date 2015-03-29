@@ -3,9 +3,22 @@
 ---------------------------
 if myHero.charName ~= "Braum" then return end
 
-local currentVersion = 1.91
+local currentVersion = 1.92
 local Updater = true
 
+Interrupt = {
+	["Katarina"] = {charName = "Katarina", stop = {["KatarinaR"] = {name = "Death lotus", spellName = "KatarinaR", ult = true }}},
+	["Nunu"] = {charName = "Nunu", stop = {["AbsoluteZero"] = {name = "Absolute Zero", spellName = "AbsoluteZero", ult = true }}},
+	["Malzahar"] = {charName = "Malzahar", stop = {["AlZaharNetherGrasp"] = {name = "Nether Grasp", spellName = "AlZaharNetherGrasp", ult = true}}},
+	["Caitlyn"] = {charName = "Caitlyn", stop = {["CaitlynAceintheHole"] = {name = "Ace in the hole", spellName = "CaitlynAceintheHole", ult = true, projectileName = "caitlyn_ult_mis.troy"}}},
+	["FiddleSticks"] = {charName = "FiddleSticks", stop = {["Crowstorm"] = {name = "Crowstorm", spellName = "Crowstorm", ult = true}}},
+	["Galio"] = {charName = "Galio", stop = {["GalioIdolOfDurand"] = {name = "Idole of Durand", spellName = "GalioIdolOfDurand", ult = true}}},
+	["MissFortune"] = {charName = "MissFortune", stop = {["MissFortune"] = {name = "Bullet time", spellName = "MissFortuneBulletTime", ult = true}}},
+	["Pantheon"] = {charName = "Pantheon", stop = {["Pantheon_GrandSkyfall_Jump"] = {name = "Skyfall", spellName = "Pantheon_GrandSkyfall_Jump", ult = true}}},
+	["Shen"] = {charName = "Shen", stop = {["ShenStandUnited"] = {name = "Stand united", spellName = "ShenStandUnited", ult = true}}},
+	["Urgot"] = {charName = "Urgot", stop = {["UrgotSwap2"] = {name = "Position Reverser", spellName = "UrgotSwap2", ult = true}}},
+	["Warwick"] = {charName = "Warwick", stop = {["InfiniteDuress"] = {name = "Infinite Duress", spellName = "InfiniteDuress", ult = true}}},
+}
 Champions = {
 		["Lux"] = {charName = "Lux", skillshots = {
 			["LuxLightBinding"] = {name = "Light Binding", spellName = "LuxLightBinding", castDelay = 250, projectileName = "LuxLightBinding_mis.troy", projectileSpeed = 1200, range = 1300, radius = 80, type = "line", unBlockable = false, blockable = true, danger = 1},
@@ -377,7 +390,7 @@ end
 function CleanDraw()
 	if myHero.dead then return end
 	if braumCFG.draw.qDraw and Q.ready then
-		DrawCircle(myHero.x, myHero.y, myHero.z, braumCFG.combo.qConfig.qMaxRange, ARGB(255,0,0,255))
+		DrawCircle(myHero.x, myHero.y, myHero.z, Q.range, ARGB(255,0,0,255))
 	end
 	if braumCFG.draw.wDraw and W.ready then
 		DrawCircle(myHero.x, myHero.y, myHero.z, W.range, ARGB(255,0,0,255))
@@ -448,6 +461,20 @@ function Menu()
 		braumCFG.harass:addParam("manaHarass", "Min. mana to harass", SCRIPT_PARAM_SLICE, 40, 0, 100, 0)
 		braumCFG.harass:addParam("harassToggle", "Harass toggle key", SCRIPT_PARAM_ONKEYTOGGLE, false, GetKey("T"))
 		
+	braumCFG:addSubMenu("Braum - Auto-Interrupt", "interrupt")
+		braumCFG.interrupt:addParam("qqq", "------ Spells to interrupt ------", SCRIPT_PARAM_INFO, "")
+		for i, a in pairs(gEnemy) do
+			if Interrupt[a.charName] ~= nil then
+				for i, spell in pairs(Interrupt[a.charName].stop) do
+					if spell.ult == true then
+						braumCFG.interrupt:addParam(spell.spellName, a.charName.." - "..spell.name, SCRIPT_PARAM_ONOFF, true)
+					end
+				end
+			end
+		end
+		braumCFG.interrupt:addParam("qqq", "---------------------------------", SCRIPT_PARAM_INFO, "")
+		braumCFG.interrupt:addParam("autoIkey", "Auto-Interrupt key toggle", SCRIPT_PARAM_ONKEYTOGGLE, false, GetKey("G"))
+		
 	braumCFG:addSubMenu("Braum - Auto W-E", "auto")
 		braumCFG.auto:addParam("eAuto", "Auto E incoming Skillshots", SCRIPT_PARAM_ONOFF, true)
 		braumCFG.auto:addParam("HpPercent", "% Hp left to auto E", SCRIPT_PARAM_SLICE, 30, 0, 100, 0)
@@ -486,6 +513,7 @@ function Menu()
 	
 	braumCFG.combo:permaShow("comboKey")
 	braumCFG.harass:permaShow("harassToggle")
+	braumCFG.interrupt:permaShow("autoIkey")
 	braumCFG.auto:permaShow("eAuto")
 	braumCFG.auto:permaShow("eAlly")
 end
@@ -518,39 +546,53 @@ function OnProcessSpell(object, spellProc)
 						spellProc.startPos.z = object.z
 					end
 					if GetDistance(spellProc.startPos) <= range and GetDistance(spellProc.endPos) <= E.range then
-							if braumCFG.auto[spellProc.name] then
-								if braumCFG.auto.eAuto then
-									if HpCheck(myHero, braumCFG.auto.HpPercent) then
-										if E.ready then
-											if spellProc.endPos.x ~= myHero.x+65 or spellProc.endPos.z ~= myHero.z+65 then
-												CastSpell(E.key, object.x, object.z)
-											end
+						if braumCFG.auto[spellProc.name] then
+							if braumCFG.auto.eAuto then
+								if HpCheck(myHero, braumCFG.auto.HpPercent) then
+									if E.ready then
+										if spellProc.endPos.x ~= myHero.x+65 or spellProc.endPos.z ~= myHero.z+65 then
+											CastSpell(E.key, object.x, object.z)
 										end
 									end
 								end
-								if braumCFG.auto.eAlly then
-									if HpCheck(ally, braumCFG.auto.allyHp) then
-										if W.ready and E.ready then
-											if spellProc.endPos.x ~= ally.x+65 and spellProc.endPos.z ~= ally.z+65 and GetDistance(ally) < W.range then
-												CastSpell(W.key, ally)
-												CastSpell(E.key, object.x, object.z)
-											end
+							end
+							if braumCFG.auto.eAlly then
+								if HpCheck(ally, braumCFG.auto.allyHp) then
+									if W.ready and E.ready then
+										if spellProc.endPos.x ~= ally.x+65 and spellProc.endPos.z ~= ally.z+65 and GetDistance(ally) < W.range then
+											CastSpell(W.key, ally)
+											CastSpell(E.key, object.x, object.z)
 										end
 									end
 								end
 							end
 						end
-						if skillshot ~= nil and skillshot.unBlockable then
-							if unBlockable == nil then
-								unBlockableSpell = skillshot
-								unBlockableObject = object
-							end
+					end
+					if skillshot ~= nil and skillshot.unBlockable then
+						if unBlockable == nil then
+							unBlockableSpell = skillshot
+							unBlockableObject = object
 						end
 					end
 				end
 			end
 		end
 	end
+	if braumCFG.interrupt.autoIkey then
+		if object.team ~= myHero.team then
+			if Interrupt[object.charName] ~= nil then
+				spell = Interrupt[object.charName].stop[spellProc.name]
+				if spell ~= nil and spell.ult == true then
+					if GetDistance(object) < R.range then
+						if braumCFG.interrupt[spellProc.name] then
+							CastSpell(R.key, object.x, object.z)	
+						end
+					end
+				end
+			end
+		end
+	end
+end
 function unBlockableSpells()
 	if unBlockableSpell.spellName == "KatarinaR" and unBlockableObject.charName == "Katarina" then
 		local object = unBlockableObject
