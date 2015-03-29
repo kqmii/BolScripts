@@ -377,7 +377,7 @@ end
 function CleanDraw()
 	if myHero.dead then return end
 	if braumCFG.draw.qDraw and Q.ready then
-		DrawCircle(myHero.x, myHero.y, myHero.z, Q.range, ARGB(255,0,0,255))
+		DrawCircle(myHero.x, myHero.y, myHero.z, braumCFG.combo.qConfig.qMaxRange, ARGB(255,0,0,255))
 	end
 	if braumCFG.draw.wDraw and W.ready then
 		DrawCircle(myHero.x, myHero.y, myHero.z, W.range, ARGB(255,0,0,255))
