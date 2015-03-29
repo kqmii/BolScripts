@@ -3,7 +3,7 @@
 -------------------------------
 if myHero.charName ~= "Malzahar" then return end
 
-local currentVersion = 1.31
+local currentVersion = 1.32
 
 require 'VPrediction'
 require 'SxOrbwalk'
@@ -313,7 +313,7 @@ function iCast()
 	for i, target in pairs(gEnemy) do
 		local iDmg = 50 + (20 * myHero.level)
 		if target ~= nil and target.team ~= myHero.team and target.visible and not target.dead then
-			if IgniteKey ~= nil and IREADY and ValidTarget(target, 600) then
+			if IgniteKey ~= nil and IREADY and ValidTarget(target) and GetDistance(target) < 600 then
 				if target.health < iDmg then
 					CastSpell(IgniteKey, target)
 				end
