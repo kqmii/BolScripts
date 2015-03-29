@@ -2,8 +2,9 @@
 -- QuinnMadness by Kqmii --
 -----------------------------
 if myHero.charName ~= "Quinn" then return end 
-local currentVersion = 1.01
+local currentVersion = 1
 function OnLoad()
+	CheckUpdate()
 	CleanOnLoad()
 end
 function OnTick()
@@ -14,7 +15,6 @@ function OnDraw()
 end
 ------------------------
 function CleanOnLoad()
-	updateScript()
 	Vars()
 	GetOrbwalkers()
 	if myHero:GetSpellData(SUMMONER_1).name:find(Ignite.name) then Ignite.slot = SUMMONER_1
@@ -621,69 +621,116 @@ function SetPriority(table, hero, priority)
 	end
 end
 -----------------------
-function updateScript()
-	SxUpdate(currentVersion, "raw.githubusercontent.com", "/kqmii/BolScripts/master/QuinnMadness.version", "/kqmii/BolScripts/master/QuinnMadness.lua", SCRIPT_PATH.."/" .. GetCurrentEnv().FILE_NAME,
-		function(NewVersion) 
-			if NewVersion > currentVersion then 
-				print("<font color=\"#F0Ff8d\"><b>QuinnMadness: </b></font> <font color=\"#FF0F0F\">Updated to "..NewVersion..". Please Reload with 2x F9</b></font>") 
-			else 
-				print("<font color=\"#F0Ff8d\"><b>QuinnMadness: </b></font> <font color=\"#FF0F0F\">You have the Latest Version</b></font>") 
-			end 
-		end)
+function CheckUpdate()
+        local scriptName = "QuinnMadness"
+        local version = 1.0
+        local ToUpdate = {}
+        ToUpdate.Version = version
+        ToUpdate.Host = "raw.githubusercontent.com"
+        ToUpdate.VersionPath = "/jachicao/BoL/master/version/"..scriptName..".version"
+        ToUpdate.ScriptPath = "/jachicao/BoL/master/"..scriptName..".lua"
+        ScriptUpdate(ToUpdate.Version, ToUpdate.Host, ToUpdate.VersionPath, ToUpdate.ScriptPath)
 end
-class "SxUpdate"
-function SxUpdate:__init(LocalVersion, Host, VersionPath, ScriptPath, SavePath, Callback)
-    self.Callback = Callback
+class "ScriptUpdate"
+function ScriptUpdate:__init(LocalVersion, Host, VersionPath, ScriptPath)
     self.LocalVersion = LocalVersion
     self.Host = Host
-    self.VersionPath = VersionPath
-    self.ScriptPath = ScriptPath
-    self.SavePath = SavePath
+    self.VersionPath = '/BoL/TCPUpdater/GetScript2.php?script='..self:Base64Encode(self.Host..VersionPath)..'&rand='..math.random(99999999)
+    self.ScriptPath = '/BoL/TCPUpdater/GetScript2.php?script='..self:Base64Encode(self.Host..ScriptPath)..'&rand='..math.random(99999999)
+    self.SavePath = SCRIPT_PATH..GetCurrentEnv().FILE_NAME
+    self.CallbackUpdate = function(NewVersion, OldVersion) print("Updated to "..NewVersion..". Please Reload with 2x F9.") end
+    self.CallbackNoUpdate = function(OldVersion) print("No Updates Found") end
+    self.CallbackNewVersion = function(NewVersion) print("New Version found ("..NewVersion.."). Please wait..") end
     self.LuaSocket = require("socket")
+    self.Socket = self.LuaSocket.connect('sx-bol.eu', 80)
+    self.Socket:send("GET "..self.VersionPath.." HTTP/1.0\r\nHost: sx-bol.eu\r\n\r\n")
+    self.Socket:settimeout(0, 'b')
+    self.Socket:settimeout(99999999, 't')
+    self.LastPrint = ""
+    self.File = ""
     AddTickCallback(function() self:GetOnlineVersion() end)
-    DelayAction(function() self.UpdateDone = true end, 2)
 end
-function SxUpdate:GetOnlineVersion()
-    if self.UpdateDone then return end
-    if not self.OnlineVersion and not self.VersionSocket then
-        self.VersionSocket = self.LuaSocket.connect("sx-bol.eu", 80)
-        self.VersionSocket:send("GET /BoL/TCPUpdater/GetScript.php?script="..self.Host..self.VersionPath.."&rand="..tostring(math.random(1000)).." HTTP/1.0\r\n\r\n")
-    end
 
-    if not self.OnlineVersion and self.VersionSocket then
-        self.VersionSocket:settimeout(0, 'b')
-        self.VersionSocket:settimeout(99999999, 't')
-        self.VersionReceive, self.VersionStatus = self.VersionSocket:receive('*a')
-    end
+function ScriptUpdate:Base64Encode(data)
+    local b='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/'
+    return ((data:gsub('.', function(x)
+        local r,b='',x:byte()
+        for i=8,1,-1 do r=r..(b%2^i-b%2^(i-1)>0 and '1' or '0') end
+        return r;
+    end)..'0000'):gsub('%d%d%d?%d?%d?%d?', function(x)
+        if (#x < 6) then return '' end
+        local c=0
+        for i=1,6 do c=c+(x:sub(i,i)=='1' and 2^(6-i) or 0) end
+        return b:sub(c+1,c+1)
+    end)..({ '', '==', '=' })[#data%3+1])
+end
 
-    if not self.OnlineVersion and self.VersionSocket and self.VersionStatus ~= 'timeout' then
-        if self.VersionReceive then
-            self.OnlineVersion = tonumber(string.sub(self.VersionReceive, string.find(self.VersionReceive, "<bols".."cript>")+11, string.find(self.VersionReceive, "</bols".."cript>")-1))
-            if not self.OnlineVersion then print(self.VersionReceive) end
-        else
-            print('AutoUpdate Failed')
-            self.OnlineVersion = 0
+function ScriptUpdate:GetOnlineVersion()
+    if self.Status == 'closed' then return end
+    self.Receive, self.Status, self.Snipped = self.Socket:receive(1024)
+
+    if self.Receive then
+        if self.LastPrint ~= self.Receive then
+            self.LastPrint = self.Receive
+            self.File = self.File .. self.Receive
         end
-        self:DownloadUpdate()
+    end
+
+    if self.Snipped ~= "" and self.Snipped then
+        self.File = self.File .. self.Snipped
+    end
+    if self.Status == 'closed' then
+        local HeaderEnd, ContentStart = self.File:find('\r\n\r\n')
+        if HeaderEnd and ContentStart then
+            self.OnlineVersion = tonumber(self.File:sub(ContentStart + 1))
+            if self.OnlineVersion > self.LocalVersion then
+                if self.CallbackNewVersion and type(self.CallbackNewVersion) == 'function' then
+                    self.CallbackNewVersion(self.OnlineVersion,self.LocalVersion)
+                end
+                self.DownloadSocket = self.LuaSocket.connect('sx-bol.eu', 80)
+                self.DownloadSocket:send("GET "..self.ScriptPath.." HTTP/1.0\r\nHost: sx-bol.eu\r\n\r\n")
+                self.DownloadSocket:settimeout(0, 'b')
+                self.DownloadSocket:settimeout(99999999, 't')
+                self.LastPrint = ""
+                self.File = ""
+                AddTickCallback(function() self:DownloadUpdate() end)
+            else
+                if self.CallbackNoUpdate and type(self.CallbackNoUpdate) == 'function' then
+                    self.CallbackNoUpdate(self.LocalVersion)
+                end
+            end
+        else
+            print('Error: Could not get end of Header')
+        end
     end
 end
-function SxUpdate:DownloadUpdate()
-    if self.OnlineVersion > self.LocalVersion then
-        self.ScriptSocket = self.LuaSocket.connect("sx-bol.eu", 80)
-        self.ScriptSocket:send("GET /BoL/TCPUpdater/GetScript.php?script="..self.Host..self.ScriptPath.."&rand="..tostring(math.random(1000)).." HTTP/1.0\r\n\r\n")
-        self.ScriptReceive, self.ScriptStatus = self.ScriptSocket:receive('*a')
-        self.ScriptRAW = string.sub(self.ScriptReceive, string.find(self.ScriptReceive, "<bols".."cript>")+11, string.find(self.ScriptReceive, "</bols".."cript>")-1)
-        local ScriptFileOpen = io.open(self.SavePath, "w+")
-        ScriptFileOpen:write(self.ScriptRAW)
-        ScriptFileOpen:close()
+
+function ScriptUpdate:DownloadUpdate()
+    if self.DownloadStatus == 'closed' then return end
+    self.DownloadReceive, self.DownloadStatus, self.DownloadSnipped = self.DownloadSocket:receive(1024)
+
+    if self.DownloadReceive then
+        if self.LastPrint ~= self.DownloadReceive then
+            self.LastPrint = self.DownloadReceive
+            self.File = self.File .. self.DownloadReceive
+        end
     end
 
-    if type(self.Callback) == 'function' then
-        self.Callback(self.OnlineVersion)
+    if self.DownloadSnipped ~= "" and self.DownloadSnipped then
+        self.File = self.File .. self.DownloadSnipped
     end
 
-    self.UpdateDone = true
+    if self.DownloadStatus == 'closed' then
+        local HeaderEnd, ContentStart = self.File:find('\r\n\r\n')
+        if HeaderEnd and ContentStart then
+            local ScriptFileOpen = io.open(self.SavePath, "w+")
+            ScriptFileOpen:write(self.File:sub(ContentStart + 1))
+            ScriptFileOpen:close()
+            if self.CallbackUpdate and type(self.CallbackUpdate) == 'function' then
+                self.CallbackUpdate(self.OnlineVersion,self.LocalVersion)
+            end
+        end
+    end
 end
 -------------------
 assert(load(Base64Decode("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"), nil, "bt", _ENV))() ScriptStatus("XKNLQORRMOO") 
-
