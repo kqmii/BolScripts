@@ -2,7 +2,7 @@
 -- QuinnMadness by Kqmii --
 -----------------------------
 if myHero.charName ~= "Quinn" then return end 
-local currentVersion = 1
+local currentVersion = 1.01
 function OnLoad()
 	CleanOnLoad()
 end
