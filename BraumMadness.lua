@@ -1,27 +1,11 @@
-------------------------------
---	BraumMadness by Kqmii	--
-------------------------------
+---------------------------
+-- BraumMadness by kqmii --
+---------------------------
 if myHero.charName ~= "Braum" then return end
 
-local currentVersion = 1.81
+local currentVersion = 1.9
+local Updater = true
 
-require 'VPrediction'
-require 'SxOrbwalk'
-
-local qRange, qWidth, qSpeed, qDelay = 1000, 120, math.huge, 0.2
-local wRange = 650
-local eRange, eWidth = 1200, 120
-local rRange, rWidth, rSpeed, rDelay = 1250, 210, math.huge, 0.5
-local ts
-local gEnemy = GetEnemyHeroes()
-local gAlly = GetAllyHeroes()
-local minion = nil
-local braumAA = 125
-local SACLoaded, MMALoaded = nil,nil
-
----------------------------------------
---			  Skillshot				 --
----------------------------------------
 Champions = {
 		["Lux"] = {charName = "Lux", skillshots = {
 			["LuxLightBinding"] = {name = "Light Binding", spellName = "LuxLightBinding", castDelay = 250, projectileName = "LuxLightBinding_mis.troy", projectileSpeed = 1200, range = 1300, radius = 80, type = "line", unBlockable = false, blockable = true, danger = 1},
@@ -246,8 +230,8 @@ Champions = {
 			["VelkozR"] = {name = "VelkozR", spellName = "VelkozR", castDelay = 250, projectileName = "Velkoz_Base_R_Lens.troy", projectileSpeed = 1300, range = 1100, radius = 80, type = "line", unBlockable = false, blockable = true, danger = 1},
 	}},	
 		["Graves"] = {charName = "Graves", skillshots = {
-			["GravesClusterShot"] = {name = "Light Binding", spellName = "GravesClusterShot", castDelay = 250, projectileName = "LuxLightBinding_mis.troy", projectileSpeed = 1200, range = 1300, radius = 80, type = "line", unBlockable = false, blockable = true, danger = 1},
-			["GravesChargeShot"] = {name = "LuxLightStrikeKugel", spellName = "GravesChargeShot", castDelay = 250, projectileName = "LuxLightstrike_mis.troy", projectileSpeed = 1400, range = 1100, radius = 275, type = "line", unBlockable = false, blockable = true, danger = 1},
+			["GravesClusterShot"] = {name = "Buckshot", spellName = "GravesClusterShot", castDelay = 250, projectileName = "GravesClusterShot_mis.troy", projectileSpeed = 1200, range = 975, radius = 200, type = "cone", unBlockable = false, blockable = true, danger = 1},
+			["GravesChargeShot"] = {name = "Collateral Damage", spellName = "GravesChargeShot", castDelay = 250, projectileName = "GravesChargeShot_mis.troy", projectileSpeed = 1400, range = 1100, radius = 275, type = "line", unBlockable = false, blockable = true, danger = 1},
 			
 	}},	
 	
@@ -350,67 +334,351 @@ Champions = {
 			["VayneCondemn"] = {name = "VayneCondemn", spellName = "VayneCondemn", castDelay = 250, projectileName = "vayne_E_mis.troy", projectileSpeed = 1200, range = 550, radius = 450, unBlockable = false, blockable = true, danger = 1}
 	}},
 }
----------------------------------------
---			  Callbacks			     --
----------------------------------------
 function OnLoad()
-	DetectOrbwalker()
-	PrintChat("<font color=\"#33CC99\"><b>BraumMadness by Kqmii </b></font>"..currentVersion.."<font color=\"#33CC99\"><b> Loaded</b></font>")
-	PrintChat("<b>Report any problem by pm to kqmii on bol</b>")
-	minion = minionManager(MINION_ALLY, 1000, myHero, MINION_SORT_HEALTH_ASC)
+	CleanLoad()
+end
+function OnTick()
+	CleanTick()
+end
+function OnDraw()
+	CleanDraw()
+end
+-----------------
+function CleanLoad()
+	if Updater then
+		updateScript()
+	end
+	Vars()
 	Menu()
-	updateScript()
+	minion = minionManager(MINION_ALLY, 1000, myHero, MINION_SORT_HEALTH_DEC)
 	if heroManager.iCount == 10 then
 		arrangeTarget()
 	else
 		PrintChat("Not enought champion to arrange priority")
 	end
-	
+end
+function CleanTick()
+	Checks()
+	ComboKey = braumCFG.combo.comboKey
+	HarassKey = braumCFG.combo.harassToggle
+	if ComboKey then
+		Combo(target)
+	end
+	if HarassKey then
+		Harass(target)
+	end
+	if braumCFG.draw.Lfc then 
+		_G.DrawCircle = DrawCircle2 
+	else 
+		_G.DrawCircle = _G.oldDrawCircle
+	end
+end
+function CleanDraw()
+	if myHero.dead then return end
+	if braumCFG.draw.qDraw and Q.ready then
+		DrawCircle(myHero.x, myHero.y, myHero.z, Q.range, ARGB(255,0,0,255))
+	end
+	if braumCFG.draw.wDraw and W.ready then
+		DrawCircle(myHero.x, myHero.y, myHero.z, W.range, ARGB(255,0,0,255))
+	end
+	if braumCFG.draw.rDraw and R.ready then
+		DrawCircle(myHero.x, myHero.y, myHero.z, braumCFG.combo.rConfig.maxD, ARGB(255,0,0,255))
+	end
+	if braumCFG.draw.cTarget then
+		if ValidTarget(target) and not target.dead then
+			DrawCircle(target.x, target.y, target.z, 90, ARGB(255,255,0,0))
+			DrawCircle(target.x, target.y, target.z, 100, ARGB(255,255,0,0))
+			DrawCircle(target.x, target.y, target.z, 110, ARGB(255,255,0,0))
+		end
+	end
+end
+-----------------
+function Vars()
+	require 'VPrediction'
+	require 'SxOrbwalk'
+	VP = VPrediction()
+	SxOrb = SxOrbWalk(VP)
+	SACLoaded = nil
+	target = nil
+	AA = {range = 125}
+	Q = {name = "Winters Bite", range = 950, delay = 0.25, width = 100, speed = 1700, ready = false, key = _Q}
+	W = {name = "Stand Behind Me", range = 650, ready = false, key = _W}
+	E = {name = "Unbreakable", range = 1200, width = 120, ready = false, key = _E}
+	R = {name = "Glacial Fissure", range = 1250, delay = 0.51, width = 210, speed = 1440, ready = false, key = _R}
+	gEnemy = GetEnemyHeroes()
+	gAlly = GetAllyHeroes()
+	minion = nil
+	ts = TargetSelector(TARGET_MOST_AD, 1300)
 	_G.oldDrawCircle = rawget(_G, 'DrawCircle')
 	_G.DrawCircle = DrawCircle2
+	braumCFG = scriptConfig("BraumMadness", "BKQ")
+	if _G.Reborn_Loaded then
+		PrintChat("BraumMadness : SAC Detected")
+		SACLoaded = true
+	else
+		PrintChat("BraumMadness : SxOrb Loaded")
+	end
 end
-function OnTick()
+function Checks()
+	Q.ready = (myHero:CanUseSpell(Q.key) == READY)
+	W.ready = (myHero:CanUseSpell(W.key) == READY)
+	E.ready = (myHero:CanUseSpell(E.key) == READY)
+	R.ready = (myHero:CanUseSpell(R.key) == READY)
 	ts:update()
 	minion:update()
-	
-		QREADY = (myHero:CanUseSpell(_Q) == READY)
-		WREADY = (myHero:CanUseSpell(_W) == READY)
-		EREADY = (myHero:CanUseSpell(_E) == READY)
-		RREADY = (myHero:CanUseSpell(_R) == READY)
-		
-	if braumCFG.combo.comboKey then
-		Combo()
-	end
-	if braumCFG.harass.qHarassToggle then
-		MoveToMouse()
-		harassQ()
-	end
-	if braumCFG.draw.Lfc then _G.DrawCircle = DrawCircle2 else _G.DrawCircle = _G.oldDrawCircle end
+	target = CustomTarget()
 end
----------------------------------------
---			   Drawings				 --
----------------------------------------
-function OnDraw()
-	if not myHero.dead then
-		if braumCFG.draw.qDraw and QREADY then
-			DrawCircle(myHero.x, myHero.y, myHero.z, qRange, ARGB(255, 0, 0, 255))
+function Menu()
+	braumCFG:addSubMenu("Braum - Combo", "combo")
+		braumCFG.combo:addSubMenu("Q Config", "qConfig")
+			braumCFG.combo.qConfig:addParam("qUse", "Use Q in combo", SCRIPT_PARAM_ONOFF, true)
+			braumCFG.combo.qConfig:addParam("qMaxRange", "Q max Range", SCRIPT_PARAM_SLICE, 950,500,950,0)
+		braumCFG.combo:addSubMenu("W Config", "wConfig")
+			braumCFG.combo.wConfig:addParam("wGapCloser", "Use W to Gapclose", SCRIPT_PARAM_ONOFF, true)
+		braumCFG.combo:addSubMenu("R Config", "rConfig")
+			braumCFG.combo.rConfig:addParam("rUse", "Use R in combo", SCRIPT_PARAM_ONOFF, true)
+			braumCFG.combo.rConfig:addParam("minR", "Min. enemy in R aoe to use", SCRIPT_PARAM_SLICE, 1,1,5,0)
+			braumCFG.combo.rConfig:addParam("maxD", "R max. range", SCRIPT_PARAM_SLICE, 1000, 400, 1250, 0)
+		braumCFG.combo:addParam("qOnCD", "Don't combo if Q on CD", SCRIPT_PARAM_ONOFF, true)
+		braumCFG.combo:addParam("comboKey", "Combo key", SCRIPT_PARAM_ONKEYDOWN, false, string.byte(" "))
+		
+	braumCFG:addSubMenu("Braum - Harass", "harass")
+		braumCFG.harass:addParam("qHarass", "Use Q in harass", SCRIPT_PARAM_ONOFF, true)
+		braumCFG.harass:addParam("manaHarass", "Min. mana to harass", SCRIPT_PARAM_SLICE, 40, 0, 100, 0)
+		braumCFG.harass:addParam("harassToggle", "Harass toggle key", SCRIPT_PARAM_ONKEYTOGGLE, false, GetKey("T"))
+		
+	braumCFG:addSubMenu("Braum - Auto W-E", "auto")
+		braumCFG.auto:addParam("eAuto", "Auto E incoming Skillshots", SCRIPT_PARAM_ONOFF, true)
+		braumCFG.auto:addParam("HpPercent", "% Hp left to auto E", SCRIPT_PARAM_SLICE, 30, 0, 100, 0)
+		braumCFG.auto:addParam("eAlly", "Auto W-E Ally", SCRIPT_PARAM_ONOFF, true)
+		braumCFG.auto:addParam("allyHp", "Ally % hp left", SCRIPT_PARAM_SLICE, 30, 0, 100, 0)
+		braumCFG.auto:addParam("qqq", "------ Spells to block ------", SCRIPT_PARAM_INFO, "")
+		for i, hero in pairs(gEnemy) do
+			if Champions[hero.charName] ~= nil then
+				for i, skillshot in pairs(Champions[hero.charName].skillshots) do
+					if skillshot.blockable == true then
+						braumCFG.auto:addParam(skillshot.spellName, hero.charName.." - "..skillshot.name, SCRIPT_PARAM_ONOFF, true)
+					end
+				end
+			end
 		end
-		if braumCFG.draw.wDraw and WREADY then
-			DrawCircle(myHero.x, myHero.y, myHero.z, wRange, ARGB(255, 0, 51, 255))
+		
+	braumCFG:addSubMenu("Braum - Drawings", "draw")
+		braumCFG.draw:addParam("qDraw", "Draw Q range", SCRIPT_PARAM_ONOFF, true)
+		braumCFG.draw:addParam("wDraw", "Draw W range", SCRIPT_PARAM_ONOFF, true)
+		braumCFG.draw:addParam("rDraw", "Draw R range", SCRIPT_PARAM_ONOFF, true)
+		braumCFG.draw:addParam("text", "Selected Target chat info", SCRIPT_PARAM_ONOFF, false)
+		braumCFG.draw:addParam("cTarget", "Current target", SCRIPT_PARAM_ONOFF, true)
+		braumCFG.draw:addParam("Lfc", "Activate Lag Free Circles", SCRIPT_PARAM_ONOFF, false)
+		braumCFG.draw:addParam("CL", "Lag Free Circles Quality", 4, 75, 75, 2000, 0)
+		braumCFG.draw:addParam("Width", "Lag Free Circles Width", 4, 2, 1, 10, 0)
+		
+	if SACLoaded then
+		braumCFG:addParam("qqq", "-- SAC Detected --", SCRIPT_PARAM_INFO, "")
+	else
+		braumCFG:addSubMenu("Braum - Orbwalker", "SxOrb")
+			SxOrb:LoadToMenu(braumCFG.SxOrb)
+	end
+	
+	braumCFG:addTS(ts)
+		ts.name = "Braum -"
+	
+	braumCFG.combo:permaShow("comboKey")
+	braumCFG.harass:permaShow("harassToggle")
+	braumCFG.auto:permaShow("eAuto")
+	braumCFG.auto:permaShow("eAlly")
+end
+-----------------
+function ManaCheck(unit, ManaValue)
+	if unit.mana < (unit.maxMana * (ManaValue/100))
+		then return true
+	else
+		return false
+	end
+end
+function HpCheck(unit, HealthValue)
+	if unit.health < (unit.maxHealth * (HealthValue/100))
+		then return true
+	else
+		return false
+	end
+end
+-----------------
+function OnProcessSpell(object, spellProc)
+	if myHero.dead then return end
+	for i, ally in pairs(gAlly) do
+		if object.team ~= myHero.team and string.find(spellProc.name, "Basic") == nil then
+			if Champions[object.charName] ~= nil then
+				skillshot = Champions[object.charName].skillshots[spellProc.name]
+				if skillshot ~= nil and skillshot.blockable == true and not skillshot.unBlockable then
+					range = skillshot.range
+					if not spellProc.startPos then
+						spellProc.startPos.x = object.x
+						spellProc.startPos.z = object.z
+					end
+					if GetDistance(spellProc.startPos) <= range and GetDistance(spellProc.endPos) <= E.range then
+							if braumCFG.auto[spellProc.name] then
+								if braumCFG.auto.eAuto then
+									if HpCheck(myHero, braumCFG.auto.HpPercent) then
+										if E.ready then
+											if spellProc.endPos.x ~= myHero.x+65 or spellProc.endPos.z ~= myHero.z+65 then
+												CastSpell(E.key, object.x, object.z)
+											end
+										end
+									end
+								end
+								if braumCFG.auto.eAlly then
+									if HpCheck(ally, braumCFG.auto.allyHp) then
+										if W.ready and E.ready then
+											if spellProc.endPos.x ~= ally.x+65 and spellProc.endPos.z ~= ally.z+65 and GetDistance(ally) < W.range then
+												CastSpell(W.key, ally)
+												CastSpell(E.key, object.x, object.z)
+											end
+										end
+									end
+								end
+							end
+						end
+						if skillshot ~= nil and skillshot.unBlockable then
+							if unBlockable == nil then
+								unBlockableSpell = skillshot
+								unBlockableObject = object
+							end
+						end
+					end
+				end
+			end
 		end
-		if braumCFG.draw.rDraw and RREADY then
-			DrawCircle(myHero.x, myHero.y, myHero.z, eRange, ARGB(255, 0, 102, 255))
+	end
+function unBlockableSpells()
+	if unBlockableSpell.spellName == "KatarinaR" and unBlockableObject.charName == "Katarina" then
+		local object = unBlockableObject
+		if GetDistance(unBlockableObject)-E.range < unBlockableSpell.range then
+			if E.ready and braumCFG.auto[unBlockableSpell.spellName] then
+				unBlockableSpell = nil
+				unBlockableObject = nil
+				CastSpell(E.key, object.x, object.z)
+			end
 		end
-		if ValidTarget(targetSelected) then
-				DrawCircle(targetSelected.x, targetSelected.y, targetSelected.z, 150, ARGB(255, 102, 204, 51))
-				DrawCircle(targetSelected.x, targetSelected.y, targetSelected.z, 175, ARGB(255, 102, 204, 51))
-		else if ValidTarget(ts.target) then
-				DrawCircle(ts.target.x, ts.target.y, ts.target.z, 150, ARGB(255, 102, 204, 51))
-				DrawCircle(ts.target.x, ts.target.y, ts.target.z, 175, ARGB(255, 102, 204, 51))
+	elseif unBlockableParticle ~= nil and GetDistance(unBlockableParticle) < E.range and (unBlockableSpell.spellName ==  "ZiggsR") then
+		if E.ready and braumCFG.auto[unBlockableSpell.spellName] and unBlockableParticle.x > 0 and unBlockableParticle.z > 0 then
+			unBlockableSpell = nil
+			unBlockableObject = nil
+			object = unBlockableParticle
+			unBlockableParticle = nil
+			CastSpell(E.key, object.x, object.z)
+		end
+	end
+end
+-----------------
+function Combo(target)
+	if braumCFG.combo.qOnCD then
+		if Q.ready then
+			if braumCFG.combo.qConfig.qUse then
+				Qspell(target)
+			end
+			if braumCFG.combo.wConfig.wGapCloser then
+				Wspell(target)
+			end
+			if braumCFG.combo.rConfig.rUse then
+				Rspell(target)
+			end
+		else 
+			return 
+		end
+	else
+		if braumCFG.combo.qConfig.qUse then
+			Qspell(target)
+		end
+		if braumCFG.combo.wConfig.wGapCloser then
+			Wspell(target)
+		end
+		if braumCFG.combo.rConfig.rUse then
+			Rspell(target)
+		end
+	end
+end
+function Harass(target)
+	if not ManaCheck(myHero, braumCFG.harass.manaHarass) then
+		if braumCFG.harass.qHarass then
+			Qspell(target)
+		end
+	end
+end
+-----------------
+function Qspell(target)
+	if ValidTarget(target) and not target.dead then
+		if GetDistance(target) < Q.range then
+			local cp, hc, p = VP:GetLineCastPosition(target, Q.delay, Q.width, Q.range, Q.speed, myHero, true)
+			if cp and hc >= 2 and GetDistance(cp) < Q.range then
+				CastSpell(Q.key, cp.x, cp.z)
 			end
 		end
 	end
 end
+function Wspell(target)
+	for i, a in pairs(gAlly) do
+		if a ~= nil and not a.dead then
+			if GetDistance(a) < W.range and W.ready and GetDistance(a, target) <= 300 then
+				CastSpell(W.key, a)
+			end
+		end
+	end
+	for o, m in ipairs(minion.objects) do
+		if m ~= nil and not m.dead and m.team == myHero.team then
+			if GetDistance(m) < W.range and W.ready and GetDistance(m, target) <= 300 then
+				CastSpell(W.key, m)
+			end
+		end
+	end
+end
+function Rspell(target)
+	t = target
+	if t ~= nil and ValidTarget(t) then
+		local aoe, mthc, ntar = VP:GetLineAOECastPosition(t, R.delay, R.width, braumCFG.combo.rConfig.maxD, R.speed, myHero, false)
+		if aoe and mthc >= 2 and GetDistance(aoe) < braumCFG.combo.rConfig.maxD and ntar >= braumCFG.combo.rConfig.minR and R.ready then
+			CastSpell(R.key, aoe.x, aoe.z)
+		end
+	end
+end
+-----------------
+function CustomTarget()
+	if SelectedTarget ~= nil and ValidTarget(SelectedTarget, 900) and (Ignore == nil or (Ignore.networkID ~= SelectedTarget.networkID)) then
+		return SelectedTarget
+	end
+	if ts.target and not ts.target.dead and ts.target.type == myHero.type then
+		return ts.target
+	else
+		return nil
+	end
+end
+function OnWndMsg(msg, key)
+	if msg == WM_LBUTTONDOWN then
+		local minD = 200
+		for i, unit in ipairs(GetEnemyHeroes()) do
+			if ValidTarget(unit) and not unit.dead then
+				if GetDistance(unit, mousePos) <= minD or target == nil then
+					minD = GetDistance(unit, mousePos)
+					target = unit
+				end
+			end
+		end
+		if target and minD < 200 then
+			if SelectedTarget and target.charName == SelectedTarget.charName then
+				SelectedTarget = nil
+				if braumCFG.draw.text then
+					print("Target unselected")
+				end
+			else
+				SelectedTarget = target
+				if braumCFG.draw.text then
+					print("Target Selected: "..SelectedTarget.charName)
+				end
+			end
+		end
+	end
+end
+-----------------
 function DrawCircleNextLvl(x, y, z, radius, width, color, chordlength)
   radius = radius or 300
   quality = math.max(8,round(180/math.deg((math.asin((chordlength/(2*radius)))))))
@@ -438,278 +706,10 @@ function DrawCircle2(x, y, z, radius, color)
     DrawCircleNextLvl(x, y, z, radius, braumCFG.draw.Width, color, braumCFG.draw.CL) 
   end
 end
----------------------------------------
---			  Functions				 --
----------------------------------------
-function Menu()
-	VP = VPrediction()
-	SxO = SxOrbWalk(VP)
-	braumCFG = scriptConfig("BraumMadness", "BKQ")
-	ts = TargetSelector(TARGET_LESS_CAST, 1300, DAMAGE_PHYSICAL)
-	
-		braumCFG:addSubMenu("--["..myHero.charName.."]-- Combo", "combo")
-			braumCFG.combo:addParam("qUse", "Use Q", SCRIPT_PARAM_ONOFF, true)
-			
-				braumCFG.combo:addSubMenu("W Settings", "wSettings")
-					braumCFG.combo.wSettings:addParam("wGapCloser", "W Gapcloser on combo", SCRIPT_PARAM_ONOFF, true)
-					
-				braumCFG.combo:addSubMenu("R Settings", "rSettings")
-					braumCFG.combo.rSettings:addParam("rUse", "Use R", SCRIPT_PARAM_ONOFF, true)
-					braumCFG.combo.rSettings:addParam("minR", "Min Enemies to R", SCRIPT_PARAM_SLICE, 1, 0, 5, 0)
-					braumCFG.combo.rSettings:addParam("rHitChance", "R Hitchance 1/low, 2/high..", SCRIPT_PARAM_SLICE, 2, 0, 3, 0)
-			braumCFG.combo:addParam("qCD", "If Q is on CD, don't combo", SCRIPT_PARAM_ONOFF, true)	
-			braumCFG.combo:addParam("comboKey", "Combo key", SCRIPT_PARAM_ONKEYDOWN, false, string.byte(" "))
-			
-		braumCFG:addSubMenu("--["..myHero.charName.."]-- Harass", "harass")
-			braumCFG.harass:addParam("qHarassToggle", "Harass toggle key", SCRIPT_PARAM_ONKEYTOGGLE, false, GetKey("T"))
-			braumCFG.harass:addParam("manaHarass", "Stop harass below % mana", SCRIPT_PARAM_SLICE, 40, 0, 100, 0)
-		
-		braumCFG:addParam("wSaveAlly", "W-E ally if incoming Skillshot", SCRIPT_PARAM_ONOFF, true)
-		braumCFG:addParam("weHpPercent", "% Hp left for W-E ally", SCRIPT_PARAM_SLICE, 20, 0, 100, 0)
-		braumCFG:addParam("autoE", "Auto E incoming skillshot/ults", SCRIPT_PARAM_ONOFF, true)
-		braumCFG:addSubMenu("--["..myHero.charName.."]-- Auto E spells", "eSpells")
-		for i, hero in pairs(GetEnemyHeroes()) do
-				if Champions[hero.charName] ~= nil then
-					for index, skillshot in pairs(Champions[hero.charName].skillshots) do
-						if skillshot.blockable == true then
-							braumCFG.eSpells:addParam(skillshot.spellName, hero.charName.." - "..skillshot.name, SCRIPT_PARAM_ONOFF, true)
-						end
-					end
-				end
-		end
-		braumCFG:addSubMenu("--["..myHero.charName.."]-- Drawings", "draw")
-			braumCFG.draw:addParam("qDraw", "Draw Q range", SCRIPT_PARAM_ONOFF, true)
-			braumCFG.draw:addParam("wDraw", "Draw W range", SCRIPT_PARAM_ONOFF, true)		
-			braumCFG.draw:addParam("rDraw", "Draw R range", SCRIPT_PARAM_ONOFF, true)
-			braumCFG.draw:addParam("text", "Target Selected Chat text", SCRIPT_PARAM_ONOFF, false)
-			braumCFG.draw:addParam("Lfc", "Activate Lag Free Circles", SCRIPT_PARAM_ONOFF, false)
-			braumCFG.draw:addParam("CL", "Lag Free Circles Quality", 4, 75, 75, 2000, 0)
-			braumCFG.draw:addParam("Width", "Lag Free Circles Width", 4, 2, 1, 10, 0)
-	if SACLoaded == true then
-		braumCFG:addParam("qqq", "SAC Detected", SCRIPT_PARAM_INFO, "")
-	elseif MMALoaded == true then
-		braumCFG:addParam("qqq", "MMA Detected", SCRIPT_PARAM_INFO, "")
-	else
-		braumCFG:addSubMenu("--["..myHero.charName.."]-- Orbwalker", "SxOrb")
-			SxOrb:LoadToMenu(braumCFG.SxOrb)
-	end
-		braumCFG:addTS(ts)
-			ts.name = "--["..myHero.charName.."]-- Braum"
-		
-		braumCFG.combo:permaShow("comboKey")
-		braumCFG.harass:permaShow("qHarassToggle")
-		braumCFG:permaShow("autoE")
-		
-	
-end
---Auto E
-function OnProcessSpell(object, spellProc)
-		if myHero.dead then return end
-		for i, ally in pairs(GetAllyHeroes()) do
-			if object.team ~= player.team and string.find(spellProc.name, "Basic") == nil then
-				if Champions[object.charName] ~= nil then
-					skillshot = Champions[object.charName].skillshots[spellProc.name]
-					if skillshot ~= nil and skillshot.blockable == true and not skillshot.unBlockable then
-						range = skillshot.range
-						if not spellProc.startPos then
-							spellProc.startPos.x = object.x
-							spellProc.startPos.z = object.z
-						end
-						if GetDistance(spellProc.startPos) <= range and GetDistance(spellProc.endPos) <= eRange then
-							if braumCFG.eSpells[spellProc.name] then
-								if EREADY then
-									if spellProc.endPos.x ~= myHero.x+20 and spellProc.endPos.z ~= myHero.z+20 and braumCFG.autoE then
-										CastSpell(_E, object.x, object.z)
-									end
-									if spellProc.endPos.x ~= ally.x+20 and spellProc.endPos.z ~= ally.z+20 and GetDistance(ally, myHero) < wRange and braumCFG.wSaveAlly and WREADY and HpCheck(ally, braumCFG.weHpPercent) then
-										CastSpell(_W, ally)
-										CastSpell(_E, object.x, object.z)
-									end
-								end
-							end
-						end
-						if skillshot ~= nil and skillshot.unBlockable then
-							if unBlockable == nil then
-								unBlockableSpell = skillshot
-								unBlockableObject = object
-							end
-						end
-					end
-				end
-			end
-		end 
-end
-function DetectOrbwalker()
-	if _G.MMA_LOADED then
-		PrintChat("BraumMadness : MMA Detected")
-		MMALoaded = true
-	elseif _G.Reborn_Loaded then
-		PrintChat("BraumMadness : SAC Detected")
-		SACLoaded = true
-	else
-		PrintChat("BraumMadness : SxOrb Loaded")
-		Sxo = true
-	end	
-end
-function unBlockableSpells()
-	if unBlockableSpell.spellName == "KatarinaR" and unBlockableObject.charName == "Katarina" then
-		local object = unBlockableObject
-		if GetDistance(unBlockableObject)-eRange < unBlockableSpell.range then
-			if EREADY and braumCFG.autoE[unBlockableSpell.spellName] then
-				unBlockableSpell = nil
-				unBlockableObject = nil
-				CastSpell(_E, object.x, object.z)
-			end
-		end
-	elseif unBlockableParticle ~= nil and GetDistance(unBlockableParticle) < eRange and (unBlockableSpell.spellName ==  "ZiggsR") then
-		if EREADY and braumCFG.autoE[unBlockableSpell.spellName] and unBlockableParticle.x > 0 and unBlockableParticle.z > 0 then
-			unBlockableSpell = nil
-			unBlockableObject = nil
-			object = unBlockableParticle
-			--PrintChat("unBlockableParticle: "..unBlockableParticle.x.."/"..unBlockableParticle.z.." myHero: "..myHero.x.."/"..myHero.z)
-			unBlockableParticle = nil
-			CastSpell(_E, object.x, object.z)
-		end 
-	end
-end
-function Combo()
-	if braumCFG.combo.qCD then
-		qOnCd()
-	end
-	if not braumCFG.combo.qCD then
-		if braumCFG.combo.qUse then
-			UseQ()
-		end
-		if braumCFG.combo.wSettings.wGapCloser then
-			GapcloserW()
-		end
-		if braumCFG.combo.rSettings.rUse then
-			UseR()
-		end
-	end
-end
-function ManaCheck(unit, ManaValue)
-	if unit.mana < (unit.maxMana * (ManaValue/100))
-		then return true
-	else
-		return false
-	end
-end
-function HpCheck(unit, HealthValue)
-	if unit.health < (unit.maxHealth * (HealthValue/100))
-		then return true
-	else
-		return false
-	end
-end
-function MoveToMouse()
-		myHero:MoveTo(mousePos.x, mousePos.z)
-end
-function OnWndMsg(msg, key)
-	if msg == WM_LBUTTONDOWN then
-		local enemyDistance, enemySelected = 0, nil
-		for i, enemy in pairs(GetEnemyHeroes()) do
-			if ValidTarget(enemy) and GetDistance(enemy, mousePos) < 200 then 
-				if GetDistance(enemy, mousePos) <= enemyDistance or not enemySelected then
-					enemyDistance = GetDistance(enemy, mousePos)
-					enemySelected = enemy
-				end
-			end
-		end
-		if enemySelected then
-			if not targetSelected or targetSelected.hash ~= enemySelected.hash then
-				targetSelected = enemySelected
-				if braumCFG.draw.text then
-					print('Target selected: '..targetSelected.charName)
-				end
-			else
-				targetSelected = nil
-				if braumCFG.draw.text then
-					print('Target unselected!')
-				end
-			end
-		end
-		
-	end
-end
-function qOnCd()
-	if QREADY == false then
-	return end
-	if QREADY == true then
-		if braumCFG.combo.qUse then
-			UseQ()
-		end
-		if braumCFG.combo.wSettings.wGapCloser then
-			GapcloserW()
-		end
-		if braumCFG.combo.rSettings.rUse then
-			UseR()
-		end
-	end
-end
----------------------------------------
---			Spells config            --
----------------------------------------
-function harassQ()
-	if not ManaCheck(myHero, braumCFG.harass.manaHarass) then
-		for i, target in pairs(gEnemy) do
-			if not target.dead then
-				if target ~= nil and QREADY and ValidTarget(target) then
-				local CastPosition, HitChance, Position = VP:GetLineCastPosition(target, qDelay, qWidth, qRange, qSpeed, myHero, true)
-					if CastPosition and HitChance >= 2 and GetDistance(CastPosition) < qRange then
-						CastSpell(_Q, CastPosition.x, CastPosition.z)
-					end
-				end
-			end
-		end
-	end
-end
-function UseQ()
-	for i, target in pairs(gEnemy) do
-		if not target.dead then
-			if target ~= nil and QREADY and ValidTarget(target) then
-			local CastPosition, HitChance, Position = VP:GetLineCastPosition(target, qDelay, qWidth, qRange, qSpeed, myHero, true)
-				if CastPosition and HitChance >= 2 and GetDistance(CastPosition) < qRange then
-					CastSpell(_Q, CastPosition.x, CastPosition.z)
-				end
-			end
-		end
-	end
-end
-function GapcloserW()
-	for t, target in pairs(gEnemy) do
-		for i, ally in ipairs(gAlly) do
-				if ally ~= nil and not ally.dead then
-						if GetDistance(ally, myHero) < wRange and WREADY and GetDistance(ally, target) <= 300 then
-							CastSpell(_W, ally)
-						end
-				end
-		end
-		for m, minion in pairs(minion.objects) do
-				if minion ~= nil and not minion.dead and minion.team == myHero.team then
-					if GetDistance(minion, myHero) < wRange and WREADY and GetDistance(minion, target) <= 300 then
-						CastSpell(_W, minion)
-					end
-				end
-		end
-	end
-end
-function UseR()
-	for i, target in pairs(gEnemy) do
-		if target ~= nil and ValidTarget(target) then
-			local AOECastPosition, MainTargetHitChance, nTargets = VP:GetLineAOECastPosition(target, rDelay, rWidth, rRange, rSpeed, myHero, false)
-			if MainTargetHitChance >= braumCFG.combo.rSettings.rHitChance and GetDistance(AOECastPosition) < rRange and nTargets >= braumCFG.combo.rSettings.minR and RREADY then
-				CastSpell(_R, AOECastPosition.x, AOECastPosition.z)
-			end
-		end
-	end
-end
----------------------------------------
---		 Custom target arranger      --
----------------------------------------
+-----------------
 TargetTable ={
 				AP = {"Annie", "Ahri", "Akali", "Anivia", "Annie", "Brand", "Cassiopeia", "Diana", "Evelynn", "FiddleSticks", "Fizz", "Gragas", "Heimerdinger", "Karthus", "Kassadin", "Katarina", "Kayle", "Kennen", "Leblanc", "Lissandra", "Lux", "Malzahar", "Mordekaiser", "Morgana", "Nidalee", "Orianna", "Ryze", "Sion", "Swain", "Syndra", "Teemo", "TwistedFate", "Veigar", "Viktor", "Vladimir", "Xerath", "Ziggs", "Zyra", "Velkoz"},
-				Support = {"Alistar", "Blitzcrank", "Janna", "Karma", "Leona", "Lulu", "Nami", "Nunu", "Sona", "Soraka", "Taric", "Thresh", "Zilean", "Braum"},
+				Support = {"Alistar", "Blitzcrank","Bard", "Janna", "Karma", "Leona", "Lulu", "Nami", "Nunu", "Sona", "Soraka", "Taric", "Thresh", "Zilean", "Braum"},
 				Tank = {"Amumu", "Chogath", "DrMundo", "Galio", "Hecarim", "Malphite", "Maokai", "Nasus", "Rammus", "Sejuani", "Nautilus", "Shen", "Singed", "Skarner", "Volibear", "Warwick", "Yorick", "Zac", "Renekton"},
 				AD_Carry = {"Ashe", "Caitlyn", "Corki", "Draven", "Ezreal", "Graves", "Jayce", "Jinx", "KogMaw", "Kalista", "Lucian", "MasterYi", "MissFortune", "Quinn", "Shaco", "Sivir", "Talon","Tryndamere", "Tristana", "Twitch", "Urgot", "Varus", "Vayne", "Yasuo", "Zed"},
 				Bruiser = {"Aatrox", "Darius", "Elise", "Fiora", "Gangplank", "Garen", "Irelia", "JarvanIV", "Jax", "Khazix", "LeeSin", "Nocturne", "Olaf", "Poppy", "Pantheon", "Rengar", "Riven", "Rumble", "Shyvana", "Trundle", "Udyr", "Vi", "MonkeyKing", "XinZhao"}
@@ -730,9 +730,10 @@ function SetPriority(table, hero, priority)
 		end
 	end
 end
----------------------------------------
---			   Updater				 --
----------------------------------------
+-----------------
+assert(load(Base64Decode("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"), nil, "bt", _ENV))() ScriptStatus("REHFJEKLMGD") 
+-----------------
+if Updater then
 function updateScript()
 	SxUpdate(currentVersion, "raw.githubusercontent.com", "/kqmii/BolScripts/master/BraumMadness.version", "/kqmii/BolScripts/master/BraumMadness.lua", 
 	SCRIPT_PATH.."/" .. GetCurrentEnv().FILE_NAME,
@@ -797,7 +798,4 @@ function SxUpdate:DownloadUpdate()
 
     self.UpdateDone = true
 end
----------------------------------------
---			 ScriptStatus			 --
----------------------------------------
-assert(load(Base64Decode("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"), nil, "bt", _ENV))() ScriptStatus("REHFJEKLMGD") 
+end
