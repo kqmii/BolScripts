@@ -3,7 +3,7 @@
 -------------------------------
 if myHero.charName ~= "Malzahar" then return end
 
-local currentVersion = 1.32
+local currentVersion = 1.33
 
 require 'VPrediction'
 require 'SxOrbwalk'
@@ -56,15 +56,15 @@ function OnTick()
 	ts:update()
 	EnemyMinions:update()
 	JungleMinions:update()
-
+	target = ts.target
 	QREADY = (myHero:CanUseSpell(_Q) == READY)
 	WREADY = (myHero:CanUseSpell(_W) == READY)
 	EREADY = (myHero:CanUseSpell(_E) == READY)
 	RREADY = (myHero:CanUseSpell(_R) == READY)
 	IREADY = (IgniteKey ~= nil and myHero:CanUseSpell(IgniteKey) == READY)
 	
-	if malzCFG.combo.comboKey then
-		killTarget()
+	if malzCFG.combo.comboKey and target ~= nil then
+		killTarget(target)
 	end
 	if malzCFG.lc.LcKey then
 		Laneclear()
@@ -199,24 +199,6 @@ function Menu()
 		malzCFG.KS:permaShow("KSactif")
 		malzCFG.lc:permaShow("LcKey")
 end
-function OnApplyBuff(unit, source, buff)
-	if unit.isMe and buff.name =="alzaharnethergraspsound" then
-		UltON = true
-		--print(buff.name)
-	end
-	if unit and unit == EnemyMinions.objects and buff.name =="AlZaharMaleficVisions" then
-		AlreadyE = true
-	end
-end
-function OnRemoveBuff(unit, buff)
-	if unit.isMe and buff.name =="alzaharnethergraspsound" then
-		UltON = false
-		--print(buff.name)
-	end
-	if unit and unit == EnemyMinions.objects and buff.name =="AlZaharMaleficVisions" then
-		AlreadyE = false
-	end
-end
 function FocusEminion()
 	for i, minion in pairs(EnemyMinions.objects) do
 		if ValidTarget(minion) and not minion.dead then
@@ -276,7 +258,9 @@ function Harass()
 end
 function KS()
 	if malzCFG.KS.iKs then
-		iCast()
+		for i, target in pairs(gEnemy) do
+			iCast(target)
+		end
 	end
 	if malzCFG.KS.eKs then
 		eKs()
@@ -288,10 +272,9 @@ function KS()
 		rKs()
 	end
 end
-function killTarget()
-	target = ts.target
-		if malzCFG.combo.iUse then
-			iCast()
+function killTarget(target)
+		if malzCFG.combo.iUse and IgniteKey ~= nil then
+			iCast(target)
 		end
 		if malzCFG.combo.qUse then
 			qCombo(target)
@@ -309,8 +292,7 @@ end
 ---------------------------------------
 --			Spells config            --
 ---------------------------------------
-function iCast()
-	for i, target in pairs(gEnemy) do
+function iCast(target)
 		local iDmg = 50 + (20 * myHero.level)
 		if target ~= nil and target.team ~= myHero.team and target.visible and not target.dead then
 			if IgniteKey ~= nil and IREADY and ValidTarget(target) and GetDistance(target) < 600 then
@@ -320,7 +302,7 @@ function iCast()
 			end
 		end
 	end
-end
+
 function qCombo(target)
 if UltON == true then return end
 		if target ~= nil and ValidTarget(target) and not target.dead then
@@ -463,6 +445,7 @@ function rCombo(target)
 				if malzCFG.combo.rTarget[target.charName] then
 					CastSpell(_R, target)
 					UltON = true
+					DelayAction(function() UltON = false end, 2.5)
 				end
 			end
 		end
@@ -587,7 +570,6 @@ end
 --			 ScriptStatus			 --
 ---------------------------------------
 assert(load(Base64Decode("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"), nil, "bt", _ENV))() ScriptStatus("OBECGEDECDJ") 
-
 
 
 
