@@ -3,7 +3,7 @@
 ---------------------------
 if myHero.charName ~= "Braum" then return end
 
-local currentVersion = 1.92
+local currentVersion = 1.93
 local Updater = true
 
 Interrupt = {
@@ -14,12 +14,16 @@ Interrupt = {
 	["FiddleSticks"] = {charName = "FiddleSticks", stop = {["Crowstorm"] = {name = "Crowstorm", spellName = "Crowstorm", ult = true}}},
 	["Galio"] = {charName = "Galio", stop = {["GalioIdolOfDurand"] = {name = "Idole of Durand", spellName = "GalioIdolOfDurand", ult = true}}},
 	["MissFortune"] = {charName = "MissFortune", stop = {["MissFortune"] = {name = "Bullet time", spellName = "MissFortuneBulletTime", ult = true}}},
-	["Pantheon"] = {charName = "Pantheon", stop = {["Pantheon_GrandSkyfall_Jump"] = {name = "Skyfall", spellName = "Pantheon_GrandSkyfall_Jump", ult = true}}},
+	["Pantheon"] = {charName = "Pantheon", stop = {["PantheonRJump"] = {name = "Skyfall", spellName = "PantheonRJump", ult = true}}},
 	["Shen"] = {charName = "Shen", stop = {["ShenStandUnited"] = {name = "Stand united", spellName = "ShenStandUnited", ult = true}}},
 	["Urgot"] = {charName = "Urgot", stop = {["UrgotSwap2"] = {name = "Position Reverser", spellName = "UrgotSwap2", ult = true}}},
 	["Warwick"] = {charName = "Warwick", stop = {["InfiniteDuress"] = {name = "Infinite Duress", spellName = "InfiniteDuress", ult = true}}},
 }
 Champions = {
+		["Kalista"] = {charName = "Kalista", skillshots = {
+			["KalistaMysticShot"] = {name = "Pierce", spellName = "KalistaMysticShot", castDelay = 250, projectileSpeed = 1200, range = , radius = , type = "line", unBlockable = false, blockable = true, danger = 1},
+	}},		
+			
 		["Lux"] = {charName = "Lux", skillshots = {
 			["LuxLightBinding"] = {name = "Light Binding", spellName = "LuxLightBinding", castDelay = 250, projectileName = "LuxLightBinding_mis.troy", projectileSpeed = 1200, range = 1300, radius = 80, type = "line", unBlockable = false, blockable = true, danger = 1},
 			["LuxLightStrikeKugel"] = {name = "Lucent Singularity", spellName = "LuxLightStrikeKugel", castDelay = 250, projectileName = "LuxLightstrike_mis.troy", projectileSpeed = 1400, range = 1100, radius = 275, type = "circular", unBlockable = false, blockable = true, danger = 0},
@@ -323,7 +327,7 @@ Champions = {
 	}},		
 	
 		["Pantheon"] = {charName = "Pantheon", skillshots = {
-			["Pantheon_Throw"] = {name = "Pantheon_Throw", spellName = "Pantheon_Throw", castDelay = 250, projectileName = "pantheon_spear_mis.troy", projectileSpeed = 1500, range = 1500, radius = 140, unBlockable = false, blockable = true, danger = 1}
+			["PantheonQ"] = {name = "Spear Shot", spellName = "PantheonQ", castDelay = 250, projectileName = "pantheon_spear_mis.troy", projectileSpeed = 1500, range = 1500, radius = 140, unBlockable = false, blockable = true, danger = 1}
 	}},
 	
 		["Sejuani"] = {charName = "Sejuani", skillshots = {
