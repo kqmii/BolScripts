@@ -21,7 +21,7 @@ Interrupt = {
 }
 Champions = {
 		["Kalista"] = {charName = "Kalista", skillshots = {
-			["KalistaMysticShot"] = {name = "Pierce", spellName = "KalistaMysticShot", castDelay = 250, projectileSpeed = 1200, range = , radius = , type = "line", unBlockable = false, blockable = true, danger = 1},
+			["KalistaMysticShot"] = {name = "Pierce", spellName = "KalistaMysticShot", castDelay = 250, projectileSpeed = 1200, range = 1150 , radius = 30, type = "line", unBlockable = false, blockable = true, danger = 1}
 	}},		
 			
 		["Lux"] = {charName = "Lux", skillshots = {
