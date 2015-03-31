@@ -3,7 +3,7 @@
 -------------------------------
 if myHero.charName ~= "Malzahar" then return end
 
-local currentVersion = 1.33
+local currentVersion = 1.34
 
 require 'VPrediction'
 require 'SxOrbwalk'
@@ -199,22 +199,6 @@ function Menu()
 		malzCFG.KS:permaShow("KSactif")
 		malzCFG.lc:permaShow("LcKey")
 end
-function FocusEminion()
-	for i, minion in pairs(EnemyMinions.objects) do
-		if ValidTarget(minion) and not minion.dead then
-			if GetDistance(minion) < 550 and AlreadyE == true and SxOrb:GetMode(3) then
-				SxOrb:ForceTarget(minion)
-			end
-		end
-	end
-	for i, minions in pairs(JungleMinions.objects) do
-		if ValidTarget(minions) and not minions.dead then
-			if GetDistance(minions) < 550 and AlreadyE == true and SxOrb:GetMode(3) then
-				SxOrb:ForceTarget(minions)
-			end
-		end
-	end
-end
 function ManaCheck(unit, ManaValue)
 	if unit.mana < (unit.maxMana * (ManaValue/100))
 		then return true
@@ -233,6 +217,7 @@ function IsOnCC(target)
 	return false
 end
 function Laneclear()
+	if UltON == true then return end
 	if not ManaCheck(myHero, malzCFG.lc.manaStop) then
 		if malzCFG.lc.qLc then
 			qFarm()
@@ -242,11 +227,11 @@ function Laneclear()
 		end
 		if malzCFG.lc.eLc then
 			eFarm()
-			FocusEminion()
 		end
 	end
 end
 function Harass()
+	if UltON == true then return end
 	if not ManaCheck(myHero, malzCFG.harass.manaCheck) then
 		if malzCFG.harass.qHarass then
 			qHarass()
@@ -257,6 +242,7 @@ function Harass()
 	end
 end
 function KS()
+	if UltON == true then return end
 	if malzCFG.KS.iKs then
 		for i, target in pairs(gEnemy) do
 			iCast(target)
@@ -293,6 +279,7 @@ end
 --			Spells config            --
 ---------------------------------------
 function iCast(target)
+	if UltON == true then return end
 		local iDmg = 50 + (20 * myHero.level)
 		if target ~= nil and target.team ~= myHero.team and target.visible and not target.dead then
 			if IgniteKey ~= nil and IREADY and ValidTarget(target) and GetDistance(target) < 600 then
@@ -302,7 +289,6 @@ function iCast(target)
 			end
 		end
 	end
-
 function qCombo(target)
 if UltON == true then return end
 		if target ~= nil and ValidTarget(target) and not target.dead then
