@@ -431,7 +431,7 @@ function rCombo(target)
 				if malzCFG.combo.rTarget[target.charName] then
 					CastSpell(_R, target)
 					UltON = true
-					DelayAction(function() UltON = false end, 2.5)
+					DelayAction(function() UltON = false end, 2.6)
 				end
 			end
 		end
