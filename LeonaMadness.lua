@@ -7,7 +7,7 @@
 --*******************************--
 if myHero.charName ~= "Leona" then return end
 
-local currentVersion = 1.42
+local currentVersion = 1.43
 local SACLoaded, MMALoaded = nil,nil
 
 require 'VPrediction'
@@ -130,13 +130,14 @@ function OnLoad()
 end
 function OnTick()
 	ts:update()
+	target = ts.target
 	QREADY = (myHero:CanUseSpell(_Q) == READY)
 	WREADY = (myHero:CanUseSpell(_W) == READY)
 	EREADY = (myHero:CanUseSpell(_E) == READY)
 	RREADY = (myHero:CanUseSpell(_R) == READY)
 	
-	if leoCFG.Combo.comboKey then
-		Combo()
+	if leoCFG.Combo.comboKey and target ~= nil then
+		Combo(target)
 	end
 	if leoCFG.uEngage then
 		ultiEngage()
@@ -286,8 +287,7 @@ function Menu()
 			SxOrb:LoadToMenu(leoCFG.SxOrb)
 	end	
 end
-function Combo()
-	target = ts.target
+function Combo(target)
 		if leoCFG.Combo.eUse then
 			useE(target)
 		end
