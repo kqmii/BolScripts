@@ -7,7 +7,7 @@
 --*******************************--
 if myHero.charName ~= "Leona" then return end
 
-local currentVersion = 1.43
+local currentVersion = 1.44
 local SACLoaded, MMALoaded = nil,nil
 
 require 'VPrediction'
@@ -18,7 +18,7 @@ local wRange = 450
 local eDelay, eWidth, eSpeed = 0.2, 40, 2000
 local rDelay, rRadius, rRange, rSpeed = 0.625, 220, 1200, math.huge
 local wColor, eColor, rColor = ARGB(255, 204, 153, 0), ARGB(255, 204, 102, 0), ARGB(255, 204, 51, 0)
-local targetSelected = nil
+local target = nil
 local tRange = 900
 local Wards = {}
 local leonaRange = 125
@@ -130,7 +130,7 @@ function OnLoad()
 end
 function OnTick()
 	ts:update()
-	target = ts.target
+	target = CustomTarget()
 	QREADY = (myHero:CanUseSpell(_Q) == READY)
 	WREADY = (myHero:CanUseSpell(_W) == READY)
 	EREADY = (myHero:CanUseSpell(_E) == READY)
@@ -153,13 +153,8 @@ end
 ---------------------------------------
 function OnDraw()
 	if not myHero.dead then
-		if ValidTarget(targetSelected) then
-				DrawCircle(targetSelected.x, targetSelected.y, targetSelected.z, 150, ARGB(255, 102, 204, 51))
-				DrawCircle(targetSelected.x, targetSelected.y, targetSelected.z, 175, ARGB(255, 102, 204, 51))
-		else if ValidTarget(ts.target) then
-				DrawCircle(ts.target.x, ts.target.y, ts.target.z, 150, ARGB(255, 102, 204, 51))
-				DrawCircle(ts.target.x, ts.target.y, ts.target.z, 175, ARGB(255, 102, 204, 51))
-			end
+		if ValidTarget(target) then
+				
 		end
 		if leoCFG.draw.wDraw and WREADY then
 			DrawCircle(myHero.x, myHero.y, myHero.z, wRange, wColor)
@@ -286,6 +281,8 @@ function Menu()
 		leoCFG:addSubMenu("--["..myHero.charName.."]-- Orbwalker", "SxOrb")
 			SxOrb:LoadToMenu(leoCFG.SxOrb)
 	end	
+		leoCFG:addTS(ts)
+			ts.name = "Leona -"
 end
 function Combo(target)
 		if leoCFG.Combo.eUse then
@@ -450,27 +447,36 @@ function ultiEngage()
 		end
 	end
 end
+function CustomTarget()
+	if SelectedTarget ~= nil and ValidTarget(SelectedTarget, 900) and (Ignore == nil or (Ignore.networkID ~= SelectedTarget.networkID)) then
+		return SelectedTarget
+	end
+	if ts.target and not ts.target.dead and ts.target.type == myHero.type then
+		return ts.target
+	else
+		return nil
+	end
+end
 function OnWndMsg(msg, key)
 	if msg == WM_LBUTTONDOWN then
-		local enemyDistance, enemySelected = 0, nil
-		for i, enemy in pairs(GetEnemyHeroes()) do
-			if ValidTarget(enemy) and GetDistance(enemy, mousePos) < 200 then 
-				if GetDistance(enemy, mousePos) <= enemyDistance or not enemySelected then
-					enemyDistance = GetDistance(enemy, mousePos)
-					enemySelected = enemy
+		local minD = 200
+		for i, unit in ipairs(GetEnemyHeroes()) do
+			if ValidTarget(unit) and not unit.dead then
+				if GetDistance(unit, mousePos) <= minD or target == nil then
+					minD = GetDistance(unit, mousePos)
+					target = unit
 				end
 			end
 		end
-		if enemySelected then
-			if not targetSelected or targetSelected.hash ~= enemySelected.hash then
-				targetSelected = enemySelected
-				print('Target selected: '..targetSelected.charName)
+		if target and minD < 200 then
+			if SelectedTarget and target.charName == SelectedTarget.charName then
+				SelectedTarget = nil
+				print("Target unselected")
 			else
-				targetSelected = nil
-				print('Target unselected!')
+				SelectedTarget = target
+				print("Target Selected: "..SelectedTarget.charName)
 			end
 		end
-		
 	end
 end
 ---------------------------------------
