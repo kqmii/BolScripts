@@ -3,7 +3,7 @@
 --------------------------------
 if myHero.charName ~= "Vladimir" then return end
 
-local currentVersion = 1.3
+local currentVersion = 1.337
 
 local color = ARGB(255,0,255,0)
 local eTick = 0
@@ -605,10 +605,10 @@ function OnWndMsg(msg, key)
 		if target and minD < 200 then
 			if SelectedTarget and target.charName == SelectedTarget.charName then
 				SelectedTarget = nil
-				print("Target unselected")
+				--print("Target unselected")
 			else
 				SelectedTarget = target
-				print("Target Selected: "..SelectedTarget.charName)
+				--print("Target Selected: "..SelectedTarget.charName)
 			end
 		end
 	end
